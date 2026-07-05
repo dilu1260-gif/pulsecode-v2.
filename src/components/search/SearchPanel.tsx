@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useExplorerStore } from "@/features/explorer/explorerStore";
+import { useEditorStore } from "@/components/editor/editorStore";
 
 interface SearchResult {
   file: string;
@@ -12,6 +14,10 @@ export default function SearchPanel() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
+
+  const openFile = useExplorerStore((s) => s.openFile);
+  const findNodeByPath = useExplorerStore((s) => s.findNodeByPath);
+  const jumpToLine = useEditorStore((s) => s.jumpToLine);
 
   const search = async () => {
     const trimmed = query.trim();
@@ -39,6 +45,20 @@ export default function SearchPanel() {
     } finally {
       setSearching(false);
     }
+  };
+
+  const handleResultClick = (result: SearchResult) => {
+    const node = findNodeByPath(result.file);
+
+    if (!node) {
+      return;
+    }
+
+    openFile(node);
+
+    setTimeout(() => {
+      jumpToLine(result.line);
+    }, 50);
   };
 
   return (
@@ -73,6 +93,7 @@ export default function SearchPanel() {
             <button
               key={`${result.file}-${result.line}-${index}`}
               type="button"
+              onClick={() => handleResultClick(result)}
               className="mb-3 w-full rounded border border-zinc-800 p-3 text-left transition-colors hover:bg-zinc-900"
             >
               <div className="text-sm font-semibold text-blue-400">
