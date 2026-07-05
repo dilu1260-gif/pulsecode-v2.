@@ -14,6 +14,13 @@ export default function SearchPanel() {
   const [searching, setSearching] = useState(false);
 
   const search = async () => {
+    const trimmed = query.trim();
+
+    if (!trimmed) {
+      setResults([]);
+      return;
+    }
+
     setSearching(true);
 
     try {
@@ -23,12 +30,11 @@ export default function SearchPanel() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          query,
+          query: trimmed,
         }),
       });
 
       const data = await res.json();
-
       setResults(data.results ?? []);
     } finally {
       setSearching(false);
@@ -47,7 +53,7 @@ export default function SearchPanel() {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              search();
+              void search();
             }
           }}
           placeholder="Search project..."
@@ -64,9 +70,10 @@ export default function SearchPanel() {
 
         {!searching &&
           results.map((result, index) => (
-            <div
-              key={index}
-              className="mb-3 cursor-pointer rounded border border-zinc-800 p-3 hover:bg-zinc-900"
+            <button
+              key={`${result.file}-${result.line}-${index}`}
+              type="button"
+              className="mb-3 w-full rounded border border-zinc-800 p-3 text-left transition-colors hover:bg-zinc-900"
             >
               <div className="text-sm font-semibold text-blue-400">
                 {result.file}
@@ -79,12 +86,12 @@ export default function SearchPanel() {
               <div className="mt-1 font-mono text-sm text-zinc-300">
                 {result.text}
               </div>
-            </div>
+            </button>
           ))}
 
         {!searching &&
           results.length === 0 &&
-          query !== "" && (
+          query.trim() !== "" && (
             <p className="text-sm text-zinc-500">
               No results found.
             </p>
