@@ -73,9 +73,44 @@ export function useExplorerActions(node: WorkspaceNode) {
     }
   };
 
-  const handleRename = () => {
-    toast("Rename coming soon 🚀");
-  };
+  const handleRename = async () => {
+  const newName = prompt(
+    "Enter new name",
+    node.name
+  );
+
+  if (!newName || newName === node.name) {
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/files/rename", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        oldPath: node.path,
+        newName,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(
+        data.error || "Failed to rename."
+      );
+    }
+
+    await loadTree();
+
+    toast.success("Renamed successfully!");
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to rename.");
+  }
+};
 
   const handleDelete = async () => {
   const confirmed = confirm(
