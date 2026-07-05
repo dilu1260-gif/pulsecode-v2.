@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import toast from "react-hot-toast";
 import { WorkspaceNode } from "@/types/workspace";
 import { useExplorerStore } from "../explorerStore";
+import { useExplorerActions } from "../hooks/useExplorerActions";
 import { FolderIcon, FileIcon } from "./icons";
 import ContextMenu from "./ContextMenu";
 
@@ -20,15 +20,23 @@ export default function ExplorerItem({
     tree,
     setTree,
     openFile,
-    loadTree,
   } = useExplorerStore();
+
+  const {
+    handleNewFile,
+    handleNewFolder,
+    handleRename,
+    handleDelete,
+  } = useExplorerActions(node);
 
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuX, setMenuX] = useState(0);
   const [menuY, setMenuY] = useState(0);
 
   const toggleFolder = (id: string) => {
-    const update = (nodes: WorkspaceNode[]): WorkspaceNode[] =>
+    const update = (
+      nodes: WorkspaceNode[]
+    ): WorkspaceNode[] =>
       nodes.map((n) => {
         if (n.id === id) {
           return {
@@ -50,7 +58,9 @@ export default function ExplorerItem({
     setTree(update(tree));
   };
 
-  const handleContextMenu = (event: React.MouseEvent) => {
+  const handleContextMenu = (
+    event: React.MouseEvent
+  ) => {
     event.preventDefault();
 
     setMenuX(event.clientX);
@@ -60,88 +70,6 @@ export default function ExplorerItem({
 
   const closeMenu = () => {
     setMenuVisible(false);
-  };
-
-  const handleNewFile = async () => {
-    closeMenu();
-
-    if (node.type !== "folder") return;
-
-    const fileName = prompt("Enter file name");
-
-    if (!fileName) return;
-
-    try {
-      const res = await fetch("/api/files/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          folderPath: node.path,
-          fileName,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to create file.");
-      }
-
-      await loadTree();
-
-      toast.success("File created successfully!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to create file.");
-    }
-  };
-
-  const handleNewFolder = async () => {
-    closeMenu();
-
-    if (node.type !== "folder") return;
-
-    const folderName = prompt("Enter folder name");
-
-    if (!folderName) return;
-
-    try {
-      const res = await fetch("/api/files/create-folder", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          parentPath: node.path,
-          folderName,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to create folder.");
-      }
-
-      await loadTree();
-
-      toast.success("Folder created successfully!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to create folder.");
-    }
-  };
-
-  const handleRename = () => {
-    closeMenu();
-    console.log("Rename:", node);
-  };
-
-  const handleDelete = () => {
-    closeMenu();
-    console.log("Delete:", node);
   };
 
   if (node.type === "folder") {
@@ -163,15 +91,27 @@ export default function ExplorerItem({
           x={menuX}
           y={menuY}
           visible={menuVisible}
-          onNewFile={handleNewFile}
-          onNewFolder={handleNewFolder}
-          onRename={handleRename}
-          onDelete={handleDelete}
+          onNewFile={() => {
+            closeMenu();
+            handleNewFile();
+          }}
+          onNewFolder={() => {
+            closeMenu();
+            handleNewFolder();
+          }}
+          onRename={() => {
+            closeMenu();
+            handleRename();
+          }}
+          onDelete={() => {
+            closeMenu();
+            handleDelete();
+          }}
           onClose={closeMenu}
         />
 
         {node.expanded &&
-          node.children?.map((child: WorkspaceNode) => (
+          node.children?.map((child) => (
             <ExplorerItem
               key={child.id}
               node={child}
@@ -181,8 +121,7 @@ export default function ExplorerItem({
       </>
     );
   }
-
-  return (
+    return (
     <>
       <div
         onClick={() => openFile(node)}
@@ -200,10 +139,22 @@ export default function ExplorerItem({
         x={menuX}
         y={menuY}
         visible={menuVisible}
-        onNewFile={handleNewFile}
-        onNewFolder={handleNewFolder}
-        onRename={handleRename}
-        onDelete={handleDelete}
+        onNewFile={() => {
+          closeMenu();
+          handleNewFile();
+        }}
+        onNewFolder={() => {
+          closeMenu();
+          handleNewFolder();
+        }}
+        onRename={() => {
+          closeMenu();
+          handleRename();
+        }}
+        onDelete={() => {
+          closeMenu();
+          handleDelete();
+        }}
         onClose={closeMenu}
       />
     </>
