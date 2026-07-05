@@ -1,7 +1,7 @@
 "use client";
 
-import { WorkspaceNode } from "../../types/workspace";
-import { useExplorerStore } from "./explorerStore";
+import { WorkspaceNode } from "@/types/workspace";
+import { useExplorerStore } from "../explorerStore";
 import { FolderIcon, FileIcon } from "./icons";
 
 interface Props {

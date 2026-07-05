@@ -1,6 +1,6 @@
 "use client";
 
-import Explorer from "@/features/explorer/Explorer";
+import Explorer from "@/features/explorer/components/Explorer";
 import { useExplorerStore } from "@/features/explorer/explorerStore";
 import EditorTabs from "@/components/tabs/EditorTabs";
 import CodeEditor from "@/components/editor/CodeEditor";

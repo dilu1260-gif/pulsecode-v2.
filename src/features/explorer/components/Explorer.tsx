@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import ExplorerItem from "./ExplorerItem";
-import { useExplorerStore } from "./explorerStore";
+import { useExplorerStore } from "../explorerStore";
 
 export default function Explorer() {
   const { tree, loadTree } = useExplorerStore();
