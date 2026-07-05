@@ -5,13 +5,24 @@ export default function Terminal() {
   const [command, setCommand] = useState("");
   const [history, setHistory] = useState<string[]>([]);
 const [historyIndex, setHistoryIndex] = useState(-1);
-  const [output, setOutput] = useState<string[]>([
-    "Welcome to PulseCode Terminal",
-  ]);
+  interface TerminalLine {
+  text: string;
+  type: "normal" | "error" | "command";
+}
+
+const [output, setOutput] = useState<TerminalLine[]>([
+  {
+    text: "Welcome to PulseCode Terminal",
+    type: "normal",
+  },
+]);
   const clearTerminal = () => {
   setOutput([
-    "Welcome to PulseCode Terminal",
-  ]);
+  {
+    text: "Welcome to PulseCode Terminal",
+    type: "normal",
+  },
+]);
 };
 const outputRef = useRef<HTMLDivElement>(null);
 useEffect(() => {
@@ -26,7 +37,13 @@ useEffect(() => {
     const current = command;setHistory((prev) => [...prev, current]);
 setHistoryIndex(-1);
 
-    setOutput((prev) => [...prev, `$ ${current}`]);
+    setOutput((prev) => [
+  ...prev,
+  {
+    text: `$ ${current}`,
+    type: "command",
+  },
+]);
     setCommand("");
 
     try {
@@ -44,22 +61,31 @@ setHistoryIndex(-1);
 
       if (data.stdout) {
         setOutput((prev) => [
-          ...prev,
-          data.stdout,
-        ]);
+  ...prev,
+  {
+    text: data.stdout,
+    type: "normal",
+  },
+]);
       }
 
       if (data.stderr) {
         setOutput((prev) => [
-          ...prev,
-          data.stderr,
-        ]);
+  ...prev,
+  {
+    text: data.stderr,
+    type: "error",
+  },
+]);
       }
     } catch {
       setOutput((prev) => [
-        ...prev,
-        "Failed to execute command.",
-      ]);
+  ...prev,
+  {
+    text: "Failed to execute command.",
+    type: "error",
+  },
+]);
     }
   };
 
@@ -85,8 +111,19 @@ setHistoryIndex(-1);
       className="flex-1 overflow-auto p-3 font-mono text-sm text-zinc-300 whitespace-pre-wrap"
     >
       {output.map((line, index) => (
-        <div key={index}>{line}</div>
-      ))}
+  <div
+    key={index}
+    className={
+      line.type === "error"
+        ? "text-red-400"
+        : line.type === "command"
+        ? "text-green-400"
+        : "text-zinc-300"
+    }
+  >
+    {line.text}
+  </div>
+))}
     </div>
 
     <div className="flex border-t border-zinc-800">
