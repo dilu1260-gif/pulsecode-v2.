@@ -24,7 +24,7 @@ const editorRef =
   useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
 const setEditor = useEditorStore((s) => s.setEditor);
-const { targetLine, clearJump } = useEditorStore();
+const { targetLine, searchTerm, clearJump } = useEditorStore();
 
   const file = openTabs.find((t) => t.id === activeFile);
 
@@ -153,17 +153,41 @@ const { targetLine, clearJump } = useEditorStore();
     return;
   }
 
-  editorRef.current.revealLineInCenter(targetLine);
+  const editor = editorRef.current;
 
-  editorRef.current.setPosition({
-    lineNumber: targetLine,
-    column: 1,
+  editor.revealLineInCenter(targetLine);
+
+  let column = 1;
+  let endColumn = 1;
+
+  if (searchTerm) {
+    const model = editor.getModel();
+
+    if (model) {
+      const lineText = model.getLineContent(targetLine);
+
+      const index = lineText
+        .toLowerCase()
+        .indexOf(searchTerm.toLowerCase());
+
+      if (index >= 0) {
+        column = index + 1;
+        endColumn = column + searchTerm.length;
+      }
+    }
+  }
+
+  editor.setSelection({
+    startLineNumber: targetLine,
+    startColumn: column,
+    endLineNumber: targetLine,
+    endColumn,
   });
 
-  editorRef.current.focus();
+  editor.focus();
 
   clearJump();
-}, [targetLine, clearJump]);
+}, [targetLine, searchTerm, clearJump]);
 
   if (!file) {
     return (
