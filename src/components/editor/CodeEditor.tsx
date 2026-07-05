@@ -1,5 +1,6 @@
 "use client";
 
+import toast from "react-hot-toast";
 import { useEffect, useState, useCallback } from "react";
 import Editor from "@monaco-editor/react";
 import { useExplorerStore } from "@/features/explorer/explorerStore";
@@ -10,12 +11,14 @@ export default function CodeEditor() {
   const [content, setContent] = useState("");
   const [language, setLanguage] = useState("typescript");
   const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState("Ready");
 
   const file = openTabs.find((t) => t.id === activeFile);
 
   useEffect(() => {
     if (!file) {
       setContent("");
+      setStatus("Ready");
       return;
     }
 
@@ -40,6 +43,7 @@ export default function CodeEditor() {
         }
 
         setContent(data.content ?? "");
+        setStatus("Ready");
 
         const ext = currentFile.path.split(".").pop()?.toLowerCase();
 
@@ -70,6 +74,7 @@ export default function CodeEditor() {
       } catch (err) {
         console.error(err);
         setContent("Failed to load file.");
+        setStatus("Error");
       }
     }
 
@@ -81,6 +86,7 @@ export default function CodeEditor() {
 
     try {
       setSaving(true);
+      setStatus("Saving...");
 
       const res = await fetch("/api/files/write", {
         method: "POST",
@@ -99,10 +105,12 @@ export default function CodeEditor() {
         throw new Error(data.error || "Save failed");
       }
 
-      alert("File saved successfully!");
+      toast.success("File saved successfully!");
+      setStatus("Saved");
     } catch (err) {
       console.error(err);
-      alert("Failed to save file.");
+      toast.error("Failed to save file.");
+      setStatus("Error");
     } finally {
       setSaving(false);
     }
@@ -110,15 +118,13 @@ export default function CodeEditor() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      const isSave =
+      if (
         (event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === "s";
-
-      if (!isSave) return;
-
-      event.preventDefault();
-
-      saveFile();
+        event.key.toLowerCase() === "s"
+      ) {
+        event.preventDefault();
+        saveFile();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -138,7 +144,11 @@ export default function CodeEditor() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex justify-end border-b border-zinc-800 bg-zinc-900 p-2">
+      <div className="flex justify-between items-center border-b border-zinc-800 bg-zinc-900 p-2">
+        <span className="text-xs text-zinc-400">
+          {status}
+        </span>
+
         <button
           onClick={saveFile}
           disabled={saving}
@@ -155,7 +165,10 @@ export default function CodeEditor() {
           path={file.path}
           language={language}
           value={content}
-          onChange={(value) => setContent(value ?? "")}
+          onChange={(value) => {
+            setContent(value ?? "");
+            setStatus("Modified");
+          }}
           options={{
             minimap: {
               enabled: true,
@@ -166,6 +179,10 @@ export default function CodeEditor() {
             wordWrap: "on",
           }}
         />
+      </div>
+
+      <div className="flex h-8 items-center border-t border-zinc-800 bg-zinc-900 px-4 text-xs text-zinc-400">
+        PulseCode v0.2 • {language} • {status}
       </div>
     </div>
   );
