@@ -18,4 +18,4 @@ Sprint 3 - IDE Workspace
 - Monaco Editor
 - AI Chat
 - Terminal
-- Live Preview
+- Live Previewhs

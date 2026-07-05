@@ -27,9 +27,10 @@ interface ExplorerStore {
 
   setTabDirty: (id: string, dirty: boolean) => void;
 
-  loadTree: () => Promise<void>;
-}
+loadTree: () => Promise<void>;
 
+findNodeByPath: (path: string) => WorkspaceNode | undefined;
+}
 export const useExplorerStore = create<ExplorerStore>((set, get) => ({
 
   tree: [],
@@ -100,5 +101,28 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
       tree,
     });
   },
+findNodeByPath: (path) => {
+    const search = (
+        nodes: WorkspaceNode[]
+          ): WorkspaceNode | undefined => {
+              for (const node of nodes) {
+                    if (node.path === path) {
+                            return node;
+                                  }
 
-}));
+                                        if (node.children) {
+                                                const found = search(node.children);
+
+                                                        if (found) {
+                                                                  return found;
+                                                                          }
+                                                                                }
+                                                                                    }
+
+                                                                                        return undefined;
+                                                                                          };
+
+                                                                                            return search(get().tree);
+                                                                                            },
+
+                                                                                          }));                                                                        

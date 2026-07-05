@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { WorkspaceNode } from "@/types/workspace";
 import { useExplorerStore } from "../explorerStore";
 import { FolderIcon, FileIcon } from "./icons";
+import ContextMenu from "./ContextMenu";
 
 interface Props {
   node: WorkspaceNode;
@@ -18,6 +20,10 @@ export default function ExplorerItem({
     setTree,
     openFile,
   } = useExplorerStore();
+
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [menuX, setMenuX] = useState(0);
+  const [menuY, setMenuY] = useState(0);
 
   const toggleFolder = (id: string) => {
     const update = (
@@ -49,7 +55,59 @@ export default function ExplorerItem({
   ) => {
     event.preventDefault();
 
-    console.log("Right click:", node);
+    setMenuX(event.clientX);
+    setMenuY(event.clientY);
+    setMenuVisible(true);
+  };
+
+  const closeMenu = () => {
+    setMenuVisible(false);
+  };
+
+  const handleNewFile = async () => {
+      closeMenu();
+
+        if (node.type !== "folder") return;
+
+          const fileName = prompt("Enter file name");
+
+            if (!fileName) return;
+
+  const res = await fetch("/api/files/create", {
+      method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+              },
+                body: JSON.stringify({
+                    folderPath: node.path,
+                        fileName,
+                          }),
+                          });
+
+                          const data = await res.json();
+
+                          if (!res.ok) {
+                            alert(data.error || "Failed to create file.");
+                              return;
+                              }
+
+                              alert("File created successfully!");
+              };
+  
+
+  const handleNewFolder = () => {
+    closeMenu();
+    console.log("New Folder:", node);
+  };
+
+  const handleRename = () => {
+    closeMenu();
+    console.log("Rename:", node);
+  };
+
+  const handleDelete = () => {
+    closeMenu();
+    console.log("Delete:", node);
   };
 
   if (node.type === "folder") {
@@ -67,8 +125,19 @@ export default function ExplorerItem({
           <span>{node.name}</span>
         </div>
 
+        <ContextMenu
+          x={menuX}
+          y={menuY}
+          visible={menuVisible}
+          onNewFile={handleNewFile}
+          onNewFolder={handleNewFolder}
+          onRename={handleRename}
+          onDelete={handleDelete}
+          onClose={closeMenu}
+        />
+
         {node.expanded &&
-          node.children?.map((child) => (
+          node.children?.map((child: WorkspaceNode) => (
             <ExplorerItem
               key={child.id}
               node={child}
@@ -80,16 +149,29 @@ export default function ExplorerItem({
   }
 
   return (
-    <div
-      onClick={() => openFile(node)}
-      onContextMenu={handleContextMenu}
-      className="flex cursor-pointer select-none items-center gap-2 px-2 py-1 hover:bg-zinc-800"
-      style={{
-        paddingLeft: `${level * 16}px`,
-      }}
-    >
-      <FileIcon />
-      <span>{node.name}</span>
-    </div>
+    <>
+      <div
+        onClick={() => openFile(node)}
+        onContextMenu={handleContextMenu}
+        className="flex cursor-pointer select-none items-center gap-2 px-2 py-1 hover:bg-zinc-800"
+        style={{
+          paddingLeft: `${level * 16}px`,
+        }}
+      >
+        <FileIcon />
+        <span>{node.name}</span>
+      </div>
+
+      <ContextMenu
+        x={menuX}
+        y={menuY}
+        visible={menuVisible}
+        onNewFile={handleNewFile}
+        onNewFolder={handleNewFolder}
+        onRename={handleRename}
+        onDelete={handleDelete}
+        onClose={closeMenu}
+      />
+    </>
   );
 }
