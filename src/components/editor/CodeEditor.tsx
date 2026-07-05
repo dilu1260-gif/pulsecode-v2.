@@ -6,7 +6,11 @@ import Editor from "@monaco-editor/react";
 import { useExplorerStore } from "@/features/explorer/explorerStore";
 
 export default function CodeEditor() {
-  const { activeFile, openTabs } = useExplorerStore();
+  const {
+    activeFile,
+    openTabs,
+    setTabDirty,
+  } = useExplorerStore();
 
   const [content, setContent] = useState("");
   const [language, setLanguage] = useState("typescript");
@@ -44,6 +48,7 @@ export default function CodeEditor() {
 
         setContent(data.content ?? "");
         setStatus("Ready");
+        setTabDirty(currentFile.id, false);
 
         const ext = currentFile.path.split(".").pop()?.toLowerCase();
 
@@ -79,7 +84,7 @@ export default function CodeEditor() {
     }
 
     loadFile();
-  }, [file]);
+  }, [activeFile]);
 
   const saveFile = useCallback(async () => {
     if (!file) return;
@@ -107,6 +112,7 @@ export default function CodeEditor() {
 
       toast.success("File saved successfully!");
       setStatus("Saved");
+      setTabDirty(file.id, false);
     } catch (err) {
       console.error(err);
       toast.error("Failed to save file.");
@@ -114,7 +120,7 @@ export default function CodeEditor() {
     } finally {
       setSaving(false);
     }
-  }, [file, content]);
+  }, [file, content, setTabDirty]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -144,7 +150,7 @@ export default function CodeEditor() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex justify-between items-center border-b border-zinc-800 bg-zinc-900 p-2">
+      <div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900 p-2">
         <span className="text-xs text-zinc-400">
           {status}
         </span>
@@ -168,6 +174,7 @@ export default function CodeEditor() {
           onChange={(value) => {
             setContent(value ?? "");
             setStatus("Modified");
+            setTabDirty(file.id, true);
           }}
           options={{
             minimap: {

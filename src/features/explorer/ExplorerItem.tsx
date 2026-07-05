@@ -44,17 +44,27 @@ export default function ExplorerItem({
     setTree(update(tree));
   };
 
+  const handleContextMenu = (
+    event: React.MouseEvent
+  ) => {
+    event.preventDefault();
+
+    console.log("Right click:", node);
+  };
+
   if (node.type === "folder") {
     return (
       <>
         <div
           onClick={() => toggleFolder(node.id)}
-          className="cursor-pointer select-none px-2 py-1 hover:bg-zinc-800"
+          onContextMenu={handleContextMenu}
+          className="flex cursor-pointer select-none items-center gap-2 px-2 py-1 hover:bg-zinc-800"
           style={{
             paddingLeft: `${level * 16}px`,
           }}
         >
-          <FolderIcon open={!!node.expanded} /> {node.name}
+          <FolderIcon open={!!node.expanded} />
+          <span>{node.name}</span>
         </div>
 
         {node.expanded &&
@@ -72,12 +82,14 @@ export default function ExplorerItem({
   return (
     <div
       onClick={() => openFile(node)}
-      className="cursor-pointer select-none px-2 py-1 hover:bg-zinc-800"
+      onContextMenu={handleContextMenu}
+      className="flex cursor-pointer select-none items-center gap-2 px-2 py-1 hover:bg-zinc-800"
       style={{
         paddingLeft: `${level * 16}px`,
       }}
     >
-      <FileIcon /> {node.name}
+      <FileIcon />
+      <span>{node.name}</span>
     </div>
   );
 }

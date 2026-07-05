@@ -5,6 +5,7 @@ import Tab from "./Tab";
 export interface OpenTab {
   id: string;
   name: string;
+  dirty?: boolean;
 }
 
 interface EditorTabsProps {
@@ -32,6 +33,7 @@ export default function EditorTabs({
             key={tab.id}
             name={tab.name}
             active={activeTab === tab.id}
+            dirty={tab.dirty ?? false}
             onClick={() => onSelect(tab.id)}
             onClose={() => onClose(tab.id)}
           />

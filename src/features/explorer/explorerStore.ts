@@ -7,6 +7,7 @@ export interface OpenTab {
   id: string;
   name: string;
   path: string;
+  dirty?: boolean;
 }
 
 interface ExplorerStore {
@@ -24,6 +25,8 @@ interface ExplorerStore {
 
   closeTab: (id: string) => void;
 
+  setTabDirty: (id: string, dirty: boolean) => void;
+
   loadTree: () => Promise<void>;
 }
 
@@ -35,7 +38,10 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
 
   activeFile: undefined,
 
-  setTree: (tree) => set({ tree }),
+  setTree: (tree) =>
+    set({
+      tree,
+    }),
 
   setActiveFile: (id) =>
     set({
@@ -53,6 +59,7 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
             id: file.id,
             name: file.name,
             path: file.path,
+            dirty: false,
           },
         ],
       });
@@ -69,6 +76,19 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
     set({
       openTabs: tabs,
       activeFile: tabs.length ? tabs[0].id : undefined,
+    });
+  },
+
+  setTabDirty: (id, dirty) => {
+    set({
+      openTabs: get().openTabs.map((tab) =>
+        tab.id === id
+          ? {
+              ...tab,
+              dirty,
+            }
+          : tab
+      ),
     });
   },
 
