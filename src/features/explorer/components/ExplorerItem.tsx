@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { WorkspaceNode } from "@/types/workspace";
 import { useExplorerStore } from "../explorerStore";
 import { FolderIcon, FileIcon } from "./icons";
@@ -19,6 +20,7 @@ export default function ExplorerItem({
     tree,
     setTree,
     openFile,
+    loadTree,
   } = useExplorerStore();
 
   const [menuVisible, setMenuVisible] = useState(false);
@@ -26,9 +28,7 @@ export default function ExplorerItem({
   const [menuY, setMenuY] = useState(0);
 
   const toggleFolder = (id: string) => {
-    const update = (
-      nodes: WorkspaceNode[]
-    ): WorkspaceNode[] =>
+    const update = (nodes: WorkspaceNode[]): WorkspaceNode[] =>
       nodes.map((n) => {
         if (n.id === id) {
           return {
@@ -50,9 +50,7 @@ export default function ExplorerItem({
     setTree(update(tree));
   };
 
-  const handleContextMenu = (
-    event: React.MouseEvent
-  ) => {
+  const handleContextMenu = (event: React.MouseEvent) => {
     event.preventDefault();
 
     setMenuX(event.clientX);
@@ -65,39 +63,75 @@ export default function ExplorerItem({
   };
 
   const handleNewFile = async () => {
-      closeMenu();
-
-        if (node.type !== "folder") return;
-
-          const fileName = prompt("Enter file name");
-
-            if (!fileName) return;
-
-  const res = await fetch("/api/files/create", {
-      method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-              },
-                body: JSON.stringify({
-                    folderPath: node.path,
-                        fileName,
-                          }),
-                          });
-
-                          const data = await res.json();
-
-                          if (!res.ok) {
-                            alert(data.error || "Failed to create file.");
-                              return;
-                              }
-
-                              alert("File created successfully!");
-              };
-  
-
-  const handleNewFolder = () => {
     closeMenu();
-    console.log("New Folder:", node);
+
+    if (node.type !== "folder") return;
+
+    const fileName = prompt("Enter file name");
+
+    if (!fileName) return;
+
+    try {
+      const res = await fetch("/api/files/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          folderPath: node.path,
+          fileName,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create file.");
+      }
+
+      await loadTree();
+
+      toast.success("File created successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to create file.");
+    }
+  };
+
+  const handleNewFolder = async () => {
+    closeMenu();
+
+    if (node.type !== "folder") return;
+
+    const folderName = prompt("Enter folder name");
+
+    if (!folderName) return;
+
+    try {
+      const res = await fetch("/api/files/create-folder", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          parentPath: node.path,
+          folderName,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create folder.");
+      }
+
+      await loadTree();
+
+      toast.success("Folder created successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to create folder.");
+    }
   };
 
   const handleRename = () => {
