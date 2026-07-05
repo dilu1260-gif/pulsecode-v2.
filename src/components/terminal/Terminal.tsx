@@ -1,17 +1,25 @@
 "use client";
 
-import { useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
 export default function Terminal() {
   const [command, setCommand] = useState("");
+  const [history, setHistory] = useState<string[]>([]);
+const [historyIndex, setHistoryIndex] = useState(-1);
   const [output, setOutput] = useState<string[]>([
     "Welcome to PulseCode Terminal",
   ]);
-
+const outputRef = useRef<HTMLDivElement>(null);
+useEffect(() => {
+  outputRef.current?.scrollTo({
+    top: outputRef.current.scrollHeight,
+    behavior: "smooth",
+  });
+}, [output]);
   const runCommand = async () => {
     if (!command.trim()) return;
 
-    const current = command;
+    const current = command;setHistory((prev) => [...prev, current]);
+setHistoryIndex(-1);
 
     setOutput((prev) => [...prev, `$ ${current}`]);
     setCommand("");
@@ -56,7 +64,10 @@ export default function Terminal() {
         TERMINAL
       </div>
 
-      <div className="flex-1 overflow-auto p-3 font-mono text-sm text-zinc-300 whitespace-pre-wrap">
+      <div
+  ref={outputRef}
+  className="flex-1 overflow-auto p-3 font-mono text-sm text-zinc-300 whitespace-pre-wrap"
+>
         {output.map((line, index) => (
           <div key={index}>{line}</div>
         ))}
@@ -66,18 +77,60 @@ export default function Terminal() {
         <span className="px-3 py-2 text-green-400">$</span>
 
         <input
-          value={command}
-          onChange={(e) =>
-            setCommand(e.target.value)
-          }
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              runCommand();
-            }
-          }}
-          className="flex-1 bg-transparent px-2 py-2 font-mono text-sm text-white outline-none"
-          placeholder="Type a command..."
-        />
+  value={command}
+  onChange={(e) => setCommand(e.target.value)}
+  autoCapitalize="off"
+  autoCorrect="off"
+  spellCheck={false}
+  autoComplete="off"
+  inputMode="text"
+  enterKeyHint="go"
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      e.stopPropagation();
+
+      runCommand();
+      return;
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+
+      if (history.length === 0) return;
+
+      const nextIndex =
+        historyIndex === -1
+          ? history.length - 1
+          : Math.max(0, historyIndex - 1);
+
+      setHistoryIndex(nextIndex);
+      setCommand(history[nextIndex]);
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+
+      if (history.length === 0) return;
+
+      if (historyIndex === -1) return;
+
+      const nextIndex = historyIndex + 1;
+
+      if (nextIndex >= history.length) {
+        setHistoryIndex(-1);
+        setCommand("");
+        return;
+      }
+
+      setHistoryIndex(nextIndex);
+      setCommand(history[nextIndex]);
+    }
+  }}
+  className="flex-1 bg-transparent px-2 py-2 font-mono text-sm text-white outline-none"
+  placeholder="Type a command..."
+/>
       </div>
     </div>
   );
