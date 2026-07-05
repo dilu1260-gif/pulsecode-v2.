@@ -4,6 +4,7 @@ import Explorer from "@/features/explorer/components/Explorer";
 import { useExplorerStore } from "@/features/explorer/explorerStore";
 import EditorTabs from "@/components/tabs/EditorTabs";
 import CodeEditor from "@/components/editor/CodeEditor";
+import Terminal from "@/components/terminal/Terminal";
 
 export default function Workspace() {
   const {
@@ -31,9 +32,13 @@ export default function Workspace() {
           onClose={closeTab}
         />
 
-        <div className="flex-1 overflow-hidden">
-          <CodeEditor />
-        </div>
+        <div className="flex flex-1 flex-col overflow-hidden">
+  <div className="flex-1 overflow-hidden">
+    <CodeEditor />
+  </div>
+
+  <Terminal />
+</div>
 
       </main>
 
