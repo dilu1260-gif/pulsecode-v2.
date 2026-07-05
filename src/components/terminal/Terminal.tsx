@@ -8,6 +8,11 @@ const [historyIndex, setHistoryIndex] = useState(-1);
   const [output, setOutput] = useState<string[]>([
     "Welcome to PulseCode Terminal",
   ]);
+  const clearTerminal = () => {
+  setOutput([
+    "Welcome to PulseCode Terminal",
+  ]);
+};
 const outputRef = useRef<HTMLDivElement>(null);
 useEffect(() => {
   outputRef.current?.scrollTo({
@@ -59,21 +64,32 @@ setHistoryIndex(-1);
   };
 
   return (
-    <div className="flex h-64 flex-col border-t border-zinc-800 bg-[#181818]">
-      <div className="border-b border-zinc-800 bg-zinc-900 px-4 py-2 text-sm font-semibold text-zinc-300">
+  <div className="flex h-64 flex-col border-t border-zinc-800 bg-[#181818]">
+
+    <div className="flex items-center justify-between border-b border-zinc-800 bg-zinc-900 px-4 py-2">
+      <span className="text-sm font-semibold text-zinc-300">
         TERMINAL
-      </div>
+      </span>
 
-      <div
-  ref={outputRef}
-  className="flex-1 overflow-auto p-3 font-mono text-sm text-zinc-300 whitespace-pre-wrap"
->
-        {output.map((line, index) => (
-          <div key={index}>{line}</div>
-        ))}
-      </div>
+      <button
+        onClick={clearTerminal}
+        className="rounded px-2 py-1 text-xs text-zinc-400 hover:bg-zinc-800 hover:text-white"
+        title="Clear Terminal"
+      >
+        Clear
+      </button>
+    </div>
 
-      <div className="flex border-t border-zinc-800">
+    <div
+      ref={outputRef}
+      className="flex-1 overflow-auto p-3 font-mono text-sm text-zinc-300 whitespace-pre-wrap"
+    >
+      {output.map((line, index) => (
+        <div key={index}>{line}</div>
+      ))}
+    </div>
+
+    <div className="flex border-t border-zinc-800">
         <span className="px-3 py-2 text-green-400">$</span>
 
         <input
