@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import InlineNameEditor from "./InlineNameEditor";
 import { WorkspaceNode } from "@/types/workspace";
 import { useExplorerStore } from "../explorerStore";
 import { useExplorerActions } from "../hooks/useExplorerActions";
@@ -31,7 +32,7 @@ export default function ExplorerItem({
 
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuX, setMenuX] = useState(0);
-  const [menuY, setMenuY] = useState(0);
+  const [menuY, setMenuY] = useState(0);const [renaming, setRenaming] = useState(false);
 
   const toggleFolder = (id: string) => {
     const update = (
@@ -84,7 +85,18 @@ export default function ExplorerItem({
           }}
         >
           <FolderIcon open={!!node.expanded} />
-          <span>{node.name}</span>
+          {renaming ? (
+  <InlineNameEditor
+    initialValue={node.name}
+    onCancel={() => setRenaming(false)}
+    onConfirm={(value) => {
+      setRenaming(false);
+      void handleRename(value);
+    }}
+  />
+) : (
+  <span>{node.name}</span>
+)}
         </div>
 
         <ContextMenu
@@ -100,13 +112,10 @@ export default function ExplorerItem({
             handleNewFolder();
           }}
           onRename={() => {
-            closeMenu();
-            handleRename();
-          }}
-          onDelete={() => {
-            closeMenu();
-            handleDelete();
-          }}
+  closeMenu();
+  setRenaming(true);
+}}
+
           onClose={closeMenu}
         />
 
@@ -132,7 +141,18 @@ export default function ExplorerItem({
         }}
       >
         <FileIcon />
-        <span>{node.name}</span>
+        {renaming ? (
+  <InlineNameEditor
+    initialValue={node.name}
+    onCancel={() => setRenaming(false)}
+    onConfirm={(value) => {
+      setRenaming(false);
+      void handleRename(value);
+    }}
+  />
+) : (
+  <span>{node.name}</span>
+)}
       </div>
 
       <ContextMenu
@@ -148,9 +168,9 @@ export default function ExplorerItem({
           handleNewFolder();
         }}
         onRename={() => {
-          closeMenu();
-          handleRename();
-        }}
+  closeMenu();
+  setRenaming(true);
+}}
         onDelete={() => {
           closeMenu();
           handleDelete();

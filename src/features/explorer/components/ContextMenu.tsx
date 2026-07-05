@@ -4,10 +4,12 @@ interface ContextMenuProps {
   x: number;
   y: number;
   visible: boolean;
-  onNewFile: () => void;
-  onNewFolder: () => void;
-  onRename: () => void;
-  onDelete: () => void;
+
+  onNewFile?: () => void;
+  onNewFolder?: () => void;
+  onRename?: () => void;
+  onDelete?: () => void;
+
   onClose: () => void;
 }
 
@@ -37,35 +39,46 @@ export default function ContextMenu({
           top: y,
         }}
       >
-        <button
-          onClick={onNewFile}
-          className="w-full px-4 py-2 text-left text-sm text-white hover:bg-zinc-800"
-        >
-          📄 New File
-        </button>
+        {onNewFile && (
+          <button
+            onClick={onNewFile}
+            className="w-full px-4 py-2 text-left text-sm text-white hover:bg-zinc-800"
+          >
+            📄 New File
+          </button>
+        )}
 
-        <button
-          onClick={onNewFolder}
-          className="w-full px-4 py-2 text-left text-sm text-white hover:bg-zinc-800"
-        >
-          📁 New Folder
-        </button>
+        {onNewFolder && (
+          <button
+            onClick={onNewFolder}
+            className="w-full px-4 py-2 text-left text-sm text-white hover:bg-zinc-800"
+          >
+            📁 New Folder
+          </button>
+        )}
 
-        <div className="border-t border-zinc-800" />
+        {(onRename || onDelete) &&
+          (onNewFile || onNewFolder) && (
+            <div className="border-t border-zinc-800" />
+          )}
 
-        <button
-          onClick={onRename}
-          className="w-full px-4 py-2 text-left text-sm text-white hover:bg-zinc-800"
-        >
-          ✏ Rename
-        </button>
+        {onRename && (
+          <button
+            onClick={onRename}
+            className="w-full px-4 py-2 text-left text-sm text-white hover:bg-zinc-800"
+          >
+            ✏ Rename
+          </button>
+        )}
 
-        <button
-          onClick={onDelete}
-          className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-zinc-800"
-        >
-          🗑 Delete
-        </button>
+        {onDelete && (
+          <button
+            onClick={onDelete}
+            className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-zinc-800"
+          >
+            🗑 Delete
+          </button>
+        )}
       </div>
     </>
   );

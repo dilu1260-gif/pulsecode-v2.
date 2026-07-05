@@ -73,11 +73,9 @@ toast.success("File created successfully!");
     }
   };
 
-  const handleRename = async () => {
-  const newName = prompt(
-    "Enter new name",
-    node.name
-  );
+  const handleRename = async (
+  newName: string
+) => {
 
   if (!newName || newName === node.name) {
     return;
