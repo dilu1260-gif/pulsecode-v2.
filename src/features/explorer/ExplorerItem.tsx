@@ -16,7 +16,6 @@ export default function ExplorerItem({
   const {
     tree,
     setTree,
-    activeFile,
     openFile,
   } = useExplorerStore();
 
@@ -55,8 +54,7 @@ export default function ExplorerItem({
             paddingLeft: `${level * 16}px`,
           }}
         >
-          <FolderIcon open={!!node.expanded} />{" "}
-          {node.name}
+          <FolderIcon open={!!node.expanded} /> {node.name}
         </div>
 
         {node.expanded &&
@@ -74,11 +72,7 @@ export default function ExplorerItem({
   return (
     <div
       onClick={() => openFile(node)}
-      className={`cursor-pointer select-none px-2 py-1 ${
-        activeFile === node.id
-          ? "bg-blue-600"
-          : "hover:bg-zinc-800"
-      }`}
+      className="cursor-pointer select-none px-2 py-1 hover:bg-zinc-800"
       style={{
         paddingLeft: `${level * 16}px`,
       }}

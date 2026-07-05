@@ -14,7 +14,13 @@ export const starterWorkspace: WorkspaceNode[] = [
         type: "file",
         path: "src/App.tsx",
         language: "typescript",
-        content: ""
+        content: `export default function App() {
+  return (
+    <div>
+      <h1>Hello PulseCode 🚀</h1>
+    </div>
+  );
+}`
       },
       {
         id: "3",
@@ -22,7 +28,13 @@ export const starterWorkspace: WorkspaceNode[] = [
         type: "file",
         path: "src/main.tsx",
         language: "typescript",
-        content: ""
+        content: `import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <App />
+);`
       },
       {
         id: "4",
@@ -37,7 +49,9 @@ export const starterWorkspace: WorkspaceNode[] = [
             type: "file",
             path: "src/components/Button.tsx",
             language: "typescript",
-            content: ""
+            content: `export default function Button() {
+  return <button>Click Me</button>;
+}`
           }
         ]
       }
@@ -49,6 +63,9 @@ export const starterWorkspace: WorkspaceNode[] = [
     type: "file",
     path: "package.json",
     language: "json",
-    content: "{}"
+    content: `{
+  "name": "pulsecode",
+  "version": "1.0.0"
+}`
   }
 ];

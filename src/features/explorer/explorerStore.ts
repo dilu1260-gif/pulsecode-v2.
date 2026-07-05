@@ -2,49 +2,57 @@
 
 import { create } from "zustand";
 import { WorkspaceNode } from "../../types/workspace";
-import { starterWorkspace } from "../../data/starterWorkspace";
 
-interface OpenTab {
+export interface OpenTab {
   id: string;
   name: string;
+  path: string;
 }
 
 interface ExplorerStore {
   tree: WorkspaceNode[];
-  activeFile?: string;
+
   openTabs: OpenTab[];
+
+  activeFile?: string;
 
   setTree: (tree: WorkspaceNode[]) => void;
 
-  openFile: (file: WorkspaceNode) => void;
-
   setActiveFile: (id: string) => void;
 
+  openFile: (file: WorkspaceNode) => void;
+
   closeTab: (id: string) => void;
+
+  loadTree: () => Promise<void>;
 }
 
 export const useExplorerStore = create<ExplorerStore>((set, get) => ({
-  tree: starterWorkspace,
 
-  activeFile: undefined,
+  tree: [],
 
   openTabs: [],
 
-  setTree: (tree) =>
+  activeFile: undefined,
+
+  setTree: (tree) => set({ tree }),
+
+  setActiveFile: (id) =>
     set({
-      tree,
+      activeFile: id,
     }),
 
   openFile: (file) => {
-    const exists = get().openTabs.find((t) => t.id === file.id);
+    const tabs = get().openTabs;
 
-    if (!exists) {
+    if (!tabs.find((t) => t.id === file.id)) {
       set({
         openTabs: [
-          ...get().openTabs,
+          ...tabs,
           {
             id: file.id,
             name: file.name,
+            path: file.path,
           },
         ],
       });
@@ -55,20 +63,22 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
     });
   },
 
-  setActiveFile: (id) =>
-    set({
-      activeFile: id,
-    }),
-
   closeTab: (id) => {
     const tabs = get().openTabs.filter((t) => t.id !== id);
 
     set({
       openTabs: tabs,
-      activeFile:
-        get().activeFile === id
-          ? tabs[tabs.length - 1]?.id
-          : get().activeFile,
+      activeFile: tabs.length ? tabs[0].id : undefined,
     });
   },
+
+  loadTree: async () => {
+    const res = await fetch("/api/files/tree");
+    const tree = await res.json();
+
+    set({
+      tree,
+    });
+  },
+
 }));
