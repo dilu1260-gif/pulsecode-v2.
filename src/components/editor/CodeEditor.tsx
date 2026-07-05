@@ -24,6 +24,7 @@ const editorRef =
   useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
 const setEditor = useEditorStore((s) => s.setEditor);
+const { targetLine, clearJump } = useEditorStore();
 
   const file = openTabs.find((t) => t.id === activeFile);
 
@@ -147,6 +148,22 @@ const setEditor = useEditorStore((s) => s.setEditor);
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [saveFile]);
+  useEffect(() => {
+  if (!editorRef.current || targetLine == null) {
+    return;
+  }
+
+  editorRef.current.revealLineInCenter(targetLine);
+
+  editorRef.current.setPosition({
+    lineNumber: targetLine,
+    column: 1,
+  });
+
+  editorRef.current.focus();
+
+  clearJump();
+}, [targetLine, clearJump]);
 
   if (!file) {
     return (
