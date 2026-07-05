@@ -3,7 +3,7 @@ import { WorkspaceNode } from "@/types/workspace";
 import { useExplorerStore } from "../explorerStore";
 
 export function useExplorerActions(node: WorkspaceNode) {
-  const { loadTree } = useExplorerStore();
+  const { loadTree, updateOpenTab } = useExplorerStore();
 
   const handleNewFile = async () => {
     if (node.type !== "folder") return;
@@ -32,7 +32,7 @@ export function useExplorerActions(node: WorkspaceNode) {
 
       await loadTree();
 
-      toast.success("File created successfully!");
+toast.success("File created successfully!");
     } catch (err) {
       console.error(err);
       toast.error("Failed to create file.");
@@ -103,9 +103,17 @@ export function useExplorerActions(node: WorkspaceNode) {
       );
     }
 
-    await loadTree();
+    const renamedPath = data.path as string;
 
-    toast.success("Renamed successfully!");
+await loadTree();
+
+updateOpenTab(
+  node.id,
+  newName,
+  renamedPath
+);
+
+toast.success("Renamed successfully!");
   } catch (err) {
     console.error(err);
     toast.error("Failed to rename.");

@@ -93,7 +93,7 @@ const { targetLine, searchTerm, clearJump } = useEditorStore();
     }
 
     loadFile();
-  }, [activeFile]);
+  }, [activeFile, file?.path, setTabDirty]);
 
   const saveFile = useCallback(async () => {
     if (!file) return;
