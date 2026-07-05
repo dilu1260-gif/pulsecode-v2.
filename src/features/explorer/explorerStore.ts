@@ -27,6 +27,12 @@ interface ExplorerStore {
 
   setTabDirty: (id: string, dirty: boolean) => void;
 
+  updateOpenTab: (
+  id: string,
+  name: string,
+  path: string
+) => void;
+
 loadTree: () => Promise<void>;
 
 findNodeByPath: (path: string) => WorkspaceNode | undefined;
@@ -92,7 +98,19 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
       ),
     });
   },
-
+updateOpenTab: (id, name, path) => {
+  set({
+    openTabs: get().openTabs.map((tab) =>
+      tab.id === id
+        ? {
+            ...tab,
+            name,
+            path,
+          }
+        : tab
+    ),
+  });
+},
   loadTree: async () => {
     const res = await fetch("/api/files/tree");
     const tree = await res.json();
