@@ -4,7 +4,9 @@ import toast from "react-hot-toast";
 import { useEffect, useState, useCallback } from "react";
 import Editor from "@monaco-editor/react";
 import { useExplorerStore } from "@/features/explorer/explorerStore";
-
+import { useRef } from "react";
+import type * as monaco from "monaco-editor";
+import { useEditorStore } from "./editorStore";
 export default function CodeEditor() {
   const {
     activeFile,
@@ -16,6 +18,12 @@ export default function CodeEditor() {
   const [language, setLanguage] = useState("typescript");
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState("Ready");
+
+const editorRef =
+
+  useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+
+const setEditor = useEditorStore((s) => s.setEditor);
 
   const file = openTabs.find((t) => t.id === activeFile);
 
@@ -171,6 +179,10 @@ export default function CodeEditor() {
           path={file.path}
           language={language}
           value={content}
+          onMount={(editor) => {
+  editorRef.current = editor;
+  setEditor(editor);
+}}
           onChange={(value) => {
             setContent(value ?? "");
             setStatus("Modified");
