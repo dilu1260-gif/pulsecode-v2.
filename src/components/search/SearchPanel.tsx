@@ -17,7 +17,7 @@ export default function SearchPanel() {
 
   const openFile = useExplorerStore((s) => s.openFile);
   const findNodeByPath = useExplorerStore((s) => s.findNodeByPath);
-  const jumpToLine = useEditorStore((s) => s.jumpToLine);
+  const jumpTo = useEditorStore((s) => s.jumpTo);
 
   const search = async () => {
     const trimmed = query.trim();
@@ -57,7 +57,7 @@ export default function SearchPanel() {
     openFile(node);
 
     setTimeout(() => {
-      jumpToLine(result.line);
+      jumpTo(result.line, query);
     }, 50);
   };
 
