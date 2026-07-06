@@ -11,6 +11,7 @@ interface ContextMenuProps {
   onRename?: () => void;
   onCopy?: () => void;
   onCut?: () => void;
+  onPaste?: () => void;
   onDuplicate?: () => void;
   onDelete?: () => void;
 
@@ -26,6 +27,7 @@ export default function ContextMenu({
   onRename,
   onCopy,
   onCut,
+  onPaste ,
   onDuplicate,
   onDelete,
   onClose,
@@ -94,6 +96,15 @@ export default function ContextMenu({
           >
             ✂ Cut
           </button>
+        )}
+
+        {onPaste && (
+          <button
+            onClick={onPaste}
+            className="w-full px-4 py-2 text-left text-sm text-white hover:bg-zinc-800"
+         >
+          📥 Paste
+        </button>
         )}
 
         {onDuplicate && (

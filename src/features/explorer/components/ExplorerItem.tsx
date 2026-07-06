@@ -29,6 +29,7 @@ export default function ExplorerItem({
   handleRename,
   handleCopy ,
   handleCut ,
+  handlePaste ,
   handleDuplicate,
   handleDelete,
 } = useExplorerActions(node);
@@ -113,6 +114,10 @@ export default function ExplorerItem({
   onNewFolder={() => {
     closeMenu();
     handleNewFolder();
+  }}
+  onPaste={() => {
+    closeMenu();
+    handlePaste();
   }}
   onRename={() => {
     closeMenu();

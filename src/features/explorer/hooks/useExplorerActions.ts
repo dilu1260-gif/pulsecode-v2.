@@ -6,8 +6,13 @@ import { useClipboardStore } from "../clipboardStore";
 export function useExplorerActions(node: WorkspaceNode) {
   const { loadTree, updateOpenTab } = useExplorerStore();
 
-  const copy = useClipboardStore((s) => s.copy);
-  const cut = useClipboardStore((s) => s.cut);
+  const {
+    copy,
+    cut,
+    clear,
+    path: clipboardPath,
+    operation,
+  } = useClipboardStore();
 
   const handleNewFile = async () => {
     if (node.type !== "folder") return;
@@ -119,6 +124,47 @@ export function useExplorerActions(node: WorkspaceNode) {
     toast.success("Cut to clipboard!");
   };
 
+  const handlePaste = async () => {
+    if (
+      node.type !== "folder" ||
+      !clipboardPath ||
+      !operation
+    ) {
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/files/paste", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sourcePath: clipboardPath,
+          destinationFolder: node.path,
+          operation,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error || "Failed to paste."
+        );
+      }
+
+      clear();
+
+      await loadTree();
+
+      toast.success("Pasted successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to paste.");
+    }
+  };
+
   const handleDuplicate = async () => {
     if (node.type !== "file") return;
 
@@ -185,6 +231,7 @@ export function useExplorerActions(node: WorkspaceNode) {
     handleRename,
     handleCopy,
     handleCut,
+    handlePaste,
     handleDuplicate,
     handleDelete,
   };

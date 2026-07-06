@@ -11,9 +11,11 @@ interface ClipboardState {
   copy: (path: string) => void;
   cut: (path: string) => void;
   clear: () => void;
+
+  hasData: () => boolean;
 }
 
-export const useClipboardStore = create<ClipboardState>((set) => ({
+export const useClipboardStore = create<ClipboardState>((set, get) => ({
   path: undefined,
   operation: undefined,
 
@@ -34,4 +36,10 @@ export const useClipboardStore = create<ClipboardState>((set) => ({
       path: undefined,
       operation: undefined,
     }),
+
+  hasData: () => {
+    const state = get();
+
+    return !!state.path && !!state.operation;
+  },
 }));
