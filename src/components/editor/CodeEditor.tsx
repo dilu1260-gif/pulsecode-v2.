@@ -7,6 +7,8 @@ import { useExplorerStore } from "@/features/explorer/explorerStore";
 import { useRef } from "react";
 import type * as monaco from "monaco-editor";
 import { useEditorStore } from "./editorStore";
+import { setEditorInstance } from "./editorInstance";
+
 import {
   useCommand,
   executeCommand,
@@ -27,7 +29,6 @@ const editorRef =
 
   useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
-const setEditor = useEditorStore((s) => s.setEditor);
 const { targetLine, searchTerm, clearJump } = useEditorStore();
 
   const file = openTabs.find((t) => t.id === activeFile);
@@ -255,7 +256,7 @@ const { targetLine, searchTerm, clearJump } = useEditorStore();
           value={content}
           onMount={(editor) => {
   editorRef.current = editor;
-  setEditor(editor);
+  setEditorInstance(editor);
 }}
           onChange={(value) => {
             setContent(value ?? "");

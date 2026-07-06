@@ -22,4 +22,24 @@ export class AIManager {
       },
     ]);
   }
+  async chatStream(
+  message: string,
+  onToken: (token: string) => void
+): Promise<void> {
+  if (!this.provider.stream) {
+    throw new Error(
+      "Streaming is not supported by the current AI provider."
+    );
+  }
+
+  await this.provider.stream(
+    [
+      {
+        role: "user",
+        content: message,
+      },
+    ],
+    onToken
+  );
+}
 }

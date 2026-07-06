@@ -5,9 +5,9 @@ import type {
 } from "../AIProvider";
 
 export class GeminiProvider implements AIProvider {
-    readonly id = "gemini";
+  readonly id = "gemini";
+  readonly name = "Google Gemini";
 
-readonly name = "Google Gemini";
   private client: GoogleGenAI;
   private model: string;
 
@@ -27,5 +27,28 @@ readonly name = "Google Gemini";
     });
 
     return response.text ?? "";
+  }
+
+  async stream(
+    messages: AIMessage[],
+    onToken: (token: string) => void
+  ): Promise<void> {
+    const prompt = messages
+      .map((m) => `${m.role}: ${m.content}`)
+      .join("\n");
+
+    const response =
+      await this.client.models.generateContentStream({
+        model: this.model,
+        contents: prompt,
+      });
+
+    for await (const chunk of response) {
+      const text = chunk.text ?? "";
+
+      if (text) {
+        onToken(text);
+      }
+    }
   }
 }
