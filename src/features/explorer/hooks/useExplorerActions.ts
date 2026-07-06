@@ -1,9 +1,13 @@
 import toast from "react-hot-toast";
 import { WorkspaceNode } from "@/types/workspace";
 import { useExplorerStore } from "../explorerStore";
+import { useClipboardStore } from "../clipboardStore";
 
 export function useExplorerActions(node: WorkspaceNode) {
   const { loadTree, updateOpenTab } = useExplorerStore();
+
+  const copy = useClipboardStore((s) => s.copy);
+  const cut = useClipboardStore((s) => s.cut);
 
   const handleNewFile = async () => {
     if (node.type !== "folder") return;
@@ -74,9 +78,7 @@ export function useExplorerActions(node: WorkspaceNode) {
   };
 
   const handleRename = async (newName: string) => {
-    if (!newName || newName === node.name) {
-      return;
-    }
+    if (!newName || newName === node.name) return;
 
     try {
       const res = await fetch("/api/files/rename", {
@@ -93,26 +95,28 @@ export function useExplorerActions(node: WorkspaceNode) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(
-          data.error || "Failed to rename."
-        );
+        throw new Error(data.error || "Failed to rename.");
       }
-
-      const renamedPath = data.path as string;
 
       await loadTree();
 
-      updateOpenTab(
-        node.id,
-        newName,
-        renamedPath
-      );
+      updateOpenTab(node.id, newName, data.path);
 
       toast.success("Renamed successfully!");
     } catch (err) {
       console.error(err);
       toast.error("Failed to rename.");
     }
+  };
+
+  const handleCopy = () => {
+    copy(node.path);
+    toast.success("Copied to clipboard!");
+  };
+
+  const handleCut = () => {
+    cut(node.path);
+    toast.success("Cut to clipboard!");
   };
 
   const handleDuplicate = async () => {
@@ -132,9 +136,7 @@ export function useExplorerActions(node: WorkspaceNode) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(
-          data.error || "Failed to duplicate."
-        );
+        throw new Error(data.error || "Failed to duplicate.");
       }
 
       await loadTree();
@@ -147,9 +149,7 @@ export function useExplorerActions(node: WorkspaceNode) {
   };
 
   const handleDelete = async () => {
-    const confirmed = confirm(
-      `Delete "${node.name}"?`
-    );
+    const confirmed = confirm(`Delete "${node.name}"?`);
 
     if (!confirmed) return;
 
@@ -167,9 +167,7 @@ export function useExplorerActions(node: WorkspaceNode) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(
-          data.error || "Failed to delete."
-        );
+        throw new Error(data.error || "Failed to delete.");
       }
 
       await loadTree();
@@ -185,6 +183,8 @@ export function useExplorerActions(node: WorkspaceNode) {
     handleNewFile,
     handleNewFolder,
     handleRename,
+    handleCopy,
+    handleCut,
     handleDuplicate,
     handleDelete,
   };

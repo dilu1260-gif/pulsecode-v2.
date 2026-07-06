@@ -27,6 +27,8 @@ export default function ExplorerItem({
   handleNewFile,
   handleNewFolder,
   handleRename,
+  handleCopy ,
+  handleCut ,
   handleDuplicate,
   handleDelete,
 } = useExplorerActions(node);
@@ -159,13 +161,21 @@ export default function ExplorerItem({
 )}
       </div>
 
-      <ContextMenu
+    <ContextMenu
   x={menuX}
   y={menuY}
   visible={menuVisible}
   onRename={() => {
     closeMenu();
     setRenaming(true);
+  }}
+  onCopy={() => {
+    closeMenu();
+    handleCopy();
+  }}
+  onCut={() => {
+    closeMenu();
+    handleCut();
   }}
   onDuplicate={() => {
     closeMenu();
