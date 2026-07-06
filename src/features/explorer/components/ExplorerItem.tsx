@@ -5,6 +5,7 @@ import InlineNameEditor from "./InlineNameEditor";
 import { WorkspaceNode } from "@/types/workspace";
 import { useExplorerStore } from "../explorerStore";
 import { useExplorerActions } from "../hooks/useExplorerActions";
+import { executeCommand } from "@/core/commands";
 import { FolderIcon, FileIcon } from "./icons";
 import ContextMenu from "./ContextMenu";
 
@@ -116,17 +117,31 @@ export default function ExplorerItem({
     handleNewFolder();
   }}
   onPaste={() => {
-    closeMenu();
-    handlePaste();
-  }}
+  closeMenu();
+
+  void executeCommand(
+    "explorer.paste",
+    {
+      source: "context-menu",
+      workspacePath: node.path,
+    }
+  );
+}}
   onRename={() => {
     closeMenu();
     setRenaming(true);
   }}
   onDelete={() => {
-    closeMenu();
-    handleDelete();
-  }}
+  closeMenu();
+
+  void executeCommand(
+    "explorer.delete",
+    {
+      source: "context-menu",
+      workspacePath: node.path,
+    }
+  );
+}}
   onClose={closeMenu}
 />
 
@@ -175,21 +190,49 @@ export default function ExplorerItem({
     setRenaming(true);
   }}
   onCopy={() => {
-    closeMenu();
-    handleCopy();
-  }}
+  closeMenu();
+
+  void executeCommand(
+    "explorer.copy",
+    {
+      source: "context-menu",
+      workspacePath: node.path,
+    }
+  );
+}}
   onCut={() => {
-    closeMenu();
-    handleCut();
-  }}
+  closeMenu();
+
+  void executeCommand(
+    "explorer.cut",
+    {
+      source: "context-menu",
+      workspacePath: node.path,
+    }
+  );
+}}
   onDuplicate={() => {
-    closeMenu();
-    handleDuplicate();
-  }}
+  closeMenu();
+
+  void executeCommand(
+    "explorer.duplicate",
+    {
+      source: "context-menu",
+      workspacePath: node.path,
+    }
+  );
+}}
   onDelete={() => {
-    closeMenu();
-    handleDelete();
-  }}
+  closeMenu();
+
+  void executeCommand(
+    "explorer.delete",
+    {
+      source: "context-menu",
+      workspacePath: node.path,
+    }
+  );
+}}
   onClose={closeMenu}
 />
     </>

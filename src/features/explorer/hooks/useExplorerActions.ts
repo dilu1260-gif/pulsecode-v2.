@@ -2,6 +2,7 @@ import toast from "react-hot-toast";
 import { WorkspaceNode } from "@/types/workspace";
 import { useExplorerStore } from "../explorerStore";
 import { useClipboardStore } from "../clipboardStore";
+import { useCommand } from "@/core/commands";
 
 export function useExplorerActions(node: WorkspaceNode) {
   const { loadTree, updateOpenTab } = useExplorerStore();
@@ -118,11 +119,39 @@ export function useExplorerActions(node: WorkspaceNode) {
     copy(node.path);
     toast.success("Copied to clipboard!");
   };
+useCommand({
+  id: "explorer.copy",
+  title: "Copy",
+  category: "Explorer",
+  shortcut: "Ctrl+C",
+  description: "Copy selected file or folder.",
+  handler: async () => {
+    handleCopy();
 
-  const handleCut = () => {
-    cut(node.path);
-    toast.success("Cut to clipboard!");
-  };
+    return {
+      success: true,
+    };
+  },
+});
+
+const handleCut = () => {
+  cut(node.path);
+  toast.success("Cut to clipboard!");
+};
+  useCommand({
+  id: "explorer.cut",
+  title: "Cut",
+  category: "Explorer",
+  shortcut: "Ctrl+X",
+  description: "Cut selected file or folder.",
+  handler: async () => {
+    handleCut();
+
+    return {
+      success: true,
+    };
+  },
+});
 
   const handlePaste = async () => {
     if (
@@ -164,7 +193,20 @@ export function useExplorerActions(node: WorkspaceNode) {
       toast.error("Failed to paste.");
     }
   };
+useCommand({
+  id: "explorer.paste",
+  title: "Paste",
+  category: "Explorer",
+  shortcut: "Ctrl+V",
+  description: "Paste copied or cut file.",
+  handler: async () => {
+    await handlePaste();
 
+    return {
+      success: true,
+    };
+  },
+});
   const handleDuplicate = async () => {
     if (node.type !== "file") return;
 
@@ -193,7 +235,19 @@ export function useExplorerActions(node: WorkspaceNode) {
       toast.error("Failed to duplicate file.");
     }
   };
+useCommand({
+  id: "explorer.duplicate",
+  title: "Duplicate",
+  category: "Explorer",
+  description: "Duplicate selected file.",
+  handler: async () => {
+    await handleDuplicate();
 
+    return {
+      success: true,
+    };
+  },
+});
   const handleDelete = async () => {
     const confirmed = confirm(`Delete "${node.name}"?`);
 
@@ -224,7 +278,20 @@ export function useExplorerActions(node: WorkspaceNode) {
       toast.error("Failed to delete.");
     }
   };
+useCommand({
+  id: "explorer.delete",
+  title: "Delete",
+  category: "Explorer",
+  shortcut: "Delete",
+  description: "Delete selected file or folder.",
+  handler: async () => {
+    await handleDelete();
 
+    return {
+      success: true,
+    };
+  },
+});
   return {
     handleNewFile,
     handleNewFolder,
