@@ -1,8 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
+import { useCommandPaletteStore } from "@/features/command-palette";
 
 export default function GlobalHotkeys() {
+const { open, setOpen } =
+  useCommandPaletteStore();
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const ctrlOrCmd = event.ctrlKey || event.metaKey;
@@ -33,9 +36,17 @@ export default function GlobalHotkeys() {
           break;
 
         case "p":
-          event.preventDefault();
-          console.log("Ctrl+P");
-          break;
+  if (event.shiftKey) {
+    event.preventDefault();
+
+    setOpen(!open);
+
+    break;
+  }
+
+  event.preventDefault();
+  console.log("Ctrl+P");
+  break;
       }
     };
 
@@ -47,7 +58,7 @@ export default function GlobalHotkeys() {
         handleKeyDown
       );
     };
-  }, []);
+  }, [open, setOpen]);
 
   return null;
 }

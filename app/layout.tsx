@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import GlobalHotkeys from "@/components/GlobalHotkeys";
 import CommandInitializer from "@/core/commands/components/CommandInitializer";
+import { CommandPalette } from "@/features/command-palette";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,8 @@ export default function RootLayout({
       <CommandInitializer />
     
         {children}
+
+        <CommandPalette />
 
         <GlobalHotkeys />
 
