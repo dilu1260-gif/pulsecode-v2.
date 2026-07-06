@@ -151,13 +151,22 @@ const { targetLine, searchTerm, clearJump } = useEditorStore();
 });
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = async (
+  event: KeyboardEvent
+) => {
       if (
         (event.ctrlKey || event.metaKey) &&
         event.key.toLowerCase() === "s"
       ) {
         event.preventDefault();
-        saveFile();
+
+        await executeCommand(
+  "file.save",
+  {
+    source: "keyboard",
+    activeFile: file?.path,
+  }
+);
       }
     };
 
