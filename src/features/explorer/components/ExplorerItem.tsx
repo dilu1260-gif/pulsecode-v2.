@@ -24,11 +24,12 @@ export default function ExplorerItem({
   } = useExplorerStore();
 
   const {
-    handleNewFile,
-    handleNewFolder,
-    handleRename,
-    handleDelete,
-  } = useExplorerActions(node);
+  handleNewFile,
+  handleNewFolder,
+  handleRename,
+  handleDuplicate,
+  handleDelete,
+} = useExplorerActions(node);
 
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuX, setMenuX] = useState(0);
@@ -100,24 +101,27 @@ export default function ExplorerItem({
         </div>
 
         <ContextMenu
-          x={menuX}
-          y={menuY}
-          visible={menuVisible}
-          onNewFile={() => {
-            closeMenu();
-            handleNewFile();
-          }}
-          onNewFolder={() => {
-            closeMenu();
-            handleNewFolder();
-          }}
-          onRename={() => {
-  closeMenu();
-  setRenaming(true);
-}}
-
-          onClose={closeMenu}
-        />
+  x={menuX}
+  y={menuY}
+  visible={menuVisible}
+  onNewFile={() => {
+    closeMenu();
+    handleNewFile();
+  }}
+  onNewFolder={() => {
+    closeMenu();
+    handleNewFolder();
+  }}
+  onRename={() => {
+    closeMenu();
+    setRenaming(true);
+  }}
+  onDelete={() => {
+    closeMenu();
+    handleDelete();
+  }}
+  onClose={closeMenu}
+/>
 
         {node.expanded &&
           node.children?.map((child) => (
@@ -156,27 +160,23 @@ export default function ExplorerItem({
       </div>
 
       <ContextMenu
-        x={menuX}
-        y={menuY}
-        visible={menuVisible}
-        onNewFile={() => {
-          closeMenu();
-          handleNewFile();
-        }}
-        onNewFolder={() => {
-          closeMenu();
-          handleNewFolder();
-        }}
-        onRename={() => {
-  closeMenu();
-  setRenaming(true);
-}}
-        onDelete={() => {
-          closeMenu();
-          handleDelete();
-        }}
-        onClose={closeMenu}
-      />
+  x={menuX}
+  y={menuY}
+  visible={menuVisible}
+  onRename={() => {
+    closeMenu();
+    setRenaming(true);
+  }}
+  onDuplicate={() => {
+    closeMenu();
+    handleDuplicate();
+  }}
+  onDelete={() => {
+    closeMenu();
+    handleDelete();
+  }}
+  onClose={closeMenu}
+/>
     </>
   );
 }

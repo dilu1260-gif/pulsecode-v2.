@@ -32,7 +32,7 @@ export function useExplorerActions(node: WorkspaceNode) {
 
       await loadTree();
 
-toast.success("File created successfully!");
+      toast.success("File created successfully!");
     } catch (err) {
       console.error(err);
       toast.error("Failed to create file.");
@@ -73,90 +73,119 @@ toast.success("File created successfully!");
     }
   };
 
-  const handleRename = async (
-  newName: string
-) => {
-
-  if (!newName || newName === node.name) {
-    return;
-  }
-
-  try {
-    const res = await fetch("/api/files/rename", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        oldPath: node.path,
-        newName,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(
-        data.error || "Failed to rename."
-      );
+  const handleRename = async (newName: string) => {
+    if (!newName || newName === node.name) {
+      return;
     }
 
-    const renamedPath = data.path as string;
+    try {
+      const res = await fetch("/api/files/rename", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          oldPath: node.path,
+          newName,
+        }),
+      });
 
-await loadTree();
+      const data = await res.json();
 
-updateOpenTab(
-  node.id,
-  newName,
-  renamedPath
-);
+      if (!res.ok) {
+        throw new Error(
+          data.error || "Failed to rename."
+        );
+      }
 
-toast.success("Renamed successfully!");
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to rename.");
-  }
-};
+      const renamedPath = data.path as string;
+
+      await loadTree();
+
+      updateOpenTab(
+        node.id,
+        newName,
+        renamedPath
+      );
+
+      toast.success("Renamed successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to rename.");
+    }
+  };
+
+  const handleDuplicate = async () => {
+    if (node.type !== "file") return;
+
+    try {
+      const res = await fetch("/api/files/duplicate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sourcePath: node.path,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error || "Failed to duplicate."
+        );
+      }
+
+      await loadTree();
+
+      toast.success("File duplicated successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to duplicate file.");
+    }
+  };
 
   const handleDelete = async () => {
-  const confirmed = confirm(
-    `Delete "${node.name}"?`
-  );
+    const confirmed = confirm(
+      `Delete "${node.name}"?`
+    );
 
-  if (!confirmed) return;
+    if (!confirmed) return;
 
-  try {
-    const res = await fetch("/api/files/delete", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        targetPath: node.path,
-      }),
-    });
+    try {
+      const res = await fetch("/api/files/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          targetPath: node.path,
+        }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      throw new Error(
-        data.error || "Failed to delete."
-      );
+      if (!res.ok) {
+        throw new Error(
+          data.error || "Failed to delete."
+        );
+      }
+
+      await loadTree();
+
+      toast.success("Deleted successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to delete.");
     }
-
-    await loadTree();
-
-    toast.success("Deleted successfully!");
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to delete.");
-  }
-};
+  };
 
   return {
     handleNewFile,
     handleNewFolder,
     handleRename,
+    handleDuplicate,
     handleDelete,
   };
 }

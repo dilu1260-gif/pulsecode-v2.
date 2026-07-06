@@ -8,6 +8,7 @@ interface ContextMenuProps {
   onNewFile?: () => void;
   onNewFolder?: () => void;
   onRename?: () => void;
+  onDuplicate?: () => void;
   onDelete?: () => void;
 
   onClose: () => void;
@@ -20,6 +21,7 @@ export default function ContextMenu({
   onNewFile,
   onNewFolder,
   onRename,
+  onDuplicate,
   onDelete,
   onClose,
 }: ContextMenuProps) {
@@ -57,8 +59,8 @@ export default function ContextMenu({
           </button>
         )}
 
-        {(onRename || onDelete) &&
-          (onNewFile || onNewFolder) && (
+        {(onNewFile || onNewFolder) &&
+          (onRename || onDuplicate || onDelete) && (
             <div className="border-t border-zinc-800" />
           )}
 
@@ -68,6 +70,15 @@ export default function ContextMenu({
             className="w-full px-4 py-2 text-left text-sm text-white hover:bg-zinc-800"
           >
             ✏ Rename
+          </button>
+        )}
+
+        {onDuplicate && (
+          <button
+            onClick={onDuplicate}
+            className="w-full px-4 py-2 text-left text-sm text-white hover:bg-zinc-800"
+          >
+            📑 Duplicate
           </button>
         )}
 
