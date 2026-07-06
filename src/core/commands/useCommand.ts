@@ -1,20 +1,18 @@
 "use client";
 
 import { useEffect } from "react";
-import {
-  commands,
-  type CommandHandler,
-} from "./commandRegistry";
+
+import { commands } from "./commandRegistry";
+import type { CommandDefinition } from "./commandDefinition";
 
 export function useCommand(
-  id: string,
-  handler: CommandHandler
+  command: CommandDefinition
 ) {
   useEffect(() => {
-    commands.register(id, handler);
+    commands.register(command);
 
     return () => {
-      commands.unregister(id);
+      commands.unregister(command.id);
     };
-  }, [id, handler]);
+  }, [command]);
 }
