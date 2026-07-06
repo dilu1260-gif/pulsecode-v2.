@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 import { commands } from "./commandRegistry";
 import type { CommandDefinition } from "./commandDefinition";
@@ -8,11 +8,16 @@ import type { CommandDefinition } from "./commandDefinition";
 export function useCommand(
   command: CommandDefinition
 ) {
+  const stableCommand = useMemo(
+    () => command,
+    [command]
+  );
+
   useEffect(() => {
-    commands.register(command);
+    commands.register(stableCommand);
 
     return () => {
-      commands.unregister(command.id);
+      commands.unregister(stableCommand.id);
     };
-  }, [command]);
+  }, [stableCommand]);
 }

@@ -7,6 +7,10 @@ import { useExplorerStore } from "@/features/explorer/explorerStore";
 import { useRef } from "react";
 import type * as monaco from "monaco-editor";
 import { useEditorStore } from "./editorStore";
+import {
+  useCommand,
+  executeCommand,
+} from "@/core/commands";
 export default function CodeEditor() {
   const {
     activeFile,
@@ -130,6 +134,21 @@ const { targetLine, searchTerm, clearJump } = useEditorStore();
       setSaving(false);
     }
   }, [file, content, setTabDirty]);
+  
+  useCommand({
+  id: "file.save",
+  title: "Save File",
+  category: "File",
+  shortcut: "Ctrl+S",
+  description: "Save the active file.",
+  handler: async () => {
+    await saveFile();
+
+    return {
+      success: true,
+    };
+  },
+});
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -205,7 +224,12 @@ const { targetLine, searchTerm, clearJump } = useEditorStore();
         </span>
 
         <button
-          onClick={saveFile}
+          onClick={() =>
+  executeCommand("file.save", {
+    source: "toolbar",
+    activeFile: file.path,
+  })
+}
           disabled={saving}
           className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
         >
