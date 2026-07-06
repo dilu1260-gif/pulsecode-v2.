@@ -2,10 +2,15 @@
 
 import { useEffect } from "react";
 import { useCommandPaletteStore } from "@/features/command-palette";
+import { useAIStore } from "@/features/ai";
 
 export default function GlobalHotkeys() {
 const { open, setOpen } =
   useCommandPaletteStore();
+  const {
+  open: aiOpen,
+  setOpen: setAIOpen,
+} = useAIStore();
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const ctrlOrCmd = event.ctrlKey || event.metaKey;
@@ -35,6 +40,13 @@ const { open, setOpen } =
           console.log("Ctrl+D");
           break;
 
+          case "l":
+  event.preventDefault();
+
+  setAIOpen(!aiOpen);
+
+  break;
+
         case "p":
   if (event.shiftKey) {
     event.preventDefault();
@@ -58,7 +70,12 @@ const { open, setOpen } =
         handleKeyDown
       );
     };
-  }, [open, setOpen]);
+  }, [
+  open,
+  setOpen,
+  aiOpen,
+  setAIOpen,
+]);
 
   return null;
 }

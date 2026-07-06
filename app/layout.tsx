@@ -5,6 +5,8 @@ import "./globals.css";
 import GlobalHotkeys from "@/components/GlobalHotkeys";
 import CommandInitializer from "@/core/commands/components/CommandInitializer";
 import { CommandPalette } from "@/features/command-palette";
+import { AIChat } from "@/features/ai";
+import { AIInitializer } from "@/core/ai";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,10 +35,13 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-black text-white">
       <CommandInitializer />
-    
+      <AIInitializer />
+
         {children}
 
         <CommandPalette />
+
+        <AIChat />
 
         <GlobalHotkeys />
 
