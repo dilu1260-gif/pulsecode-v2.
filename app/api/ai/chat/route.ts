@@ -1,13 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AIManager } from "@/core/ai/AIManager";
+import { AIManager } from "@/core/ai";
 
-export async function POST(request: NextRequest) {
+const aiManager = new AIManager();
+
+export async function POST(
+  req: NextRequest
+) {
   try {
-    const { message } = await request.json();
+    const { message } =
+      await req.json();
 
-    const ai = new AIManager();
+    if (!message) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Message is required.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
-    const response = await ai.chat(message);
+    const response = await aiManager.chat(message);
 
     return NextResponse.json({
       success: true,
@@ -19,7 +34,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error:
+          error instanceof Error
+            ? error.message
+            : "AI request failed.",
       },
       {
         status: 500,
