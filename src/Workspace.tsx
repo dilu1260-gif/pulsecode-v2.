@@ -17,6 +17,8 @@ import { useAIChat } from "@/hooks/useAIChat";
 import { registerAIActions } from "@/core/commands/actions/aiActions";
 import CommandPalette from "@/components/command-palette/CommandPalette";
 import { useCommandPalette } from "@/hooks/useCommandPalette";
+import InlinePrompt from "@/components/inline-ai/InlinePrompt";
+import { useInlineAI } from "@/hooks/useInlineAI";
 
 interface Message {
   role: "user" | "assistant";
@@ -64,6 +66,12 @@ const {
   open,
   closePalette,
 } = useCommandPalette();
+const {
+  open: inlineOpen,
+  instruction,
+  setInstruction,
+  closePrompt,
+} = useInlineAI();
 
 async function sendToAI(
   instruction?: string,
@@ -204,6 +212,22 @@ useEffect(() => {
 }, []);
   return (
   <>
+  <InlinePrompt
+  open={inlineOpen}
+  value={instruction}
+  onChange={setInstruction}
+  onClose={closePrompt}
+  onSubmit={async () => {
+    if (!instruction.trim()) return;
+
+    await sendToAI(
+      instruction,
+      false
+    );
+
+    closePrompt();
+  }}
+/>
     <CommandPalette
       open={open}
       onClose={closePalette}
