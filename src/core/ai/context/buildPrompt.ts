@@ -2,14 +2,15 @@ export interface AIContext {
   fileName?: string;
   language?: string;
   selectedCode?: string;
-
   openFiles?: string[];
-
+  referencedFiles?: {
+    path: string;
+    content: string;
+  }[];
   conversation?: {
     role: "user" | "assistant";
     content: string;
   }[];
-
   userPrompt: string;
 }
 
@@ -18,6 +19,7 @@ export function buildPrompt({
   language,
   selectedCode,
   openFiles,
+  referencedFiles,
   conversation,
   userPrompt,
 }: AIContext) {
@@ -45,17 +47,19 @@ export function buildPrompt({
       ].join("\n")
     );
   }
-if (conversation?.length) {
-  parts.push(
-    [
-      "Conversation History:",
-      ...conversation.map(
-        (message) =>
-          `${message.role === "user" ? "User" : "Assistant"}: ${message.content}`
-      ),
-    ].join("\n")
-  );
-}
+
+  if (conversation?.length) {
+    parts.push(
+      [
+        "Conversation History:",
+        ...conversation.map(
+          (message) =>
+            `${message.role === "user" ? "User" : "Assistant"}: ${message.content}`
+        ),
+      ].join("\n")
+    );
+  }
+
   if (selectedCode) {
     parts.push(
       "Selected Code:",
@@ -63,6 +67,23 @@ if (conversation?.length) {
       selectedCode,
       "```"
     );
+  }
+
+  if (referencedFiles?.length) {
+    parts.push(
+      "Referenced Files:"
+    );
+
+    for (const file of referencedFiles) {
+      parts.push(
+        [
+          `File: ${file.path}`,
+          "```",
+          file.content,
+          "```",
+        ].join("\n")
+      );
+    }
   }
 
   parts.push(

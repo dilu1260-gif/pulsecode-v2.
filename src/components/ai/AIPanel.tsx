@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import ReferenceSuggestions from "./ReferenceSuggestions";
+import { useReferenceSuggestions } from "@/hooks/useReferenceSuggestions";
 
 import type {
   AIMessage,
@@ -19,6 +21,8 @@ interface Props {
   messages: AIMessage[];
 
   conversations: Conversation[];
+
+  openFiles: string[];
 
   activeConversationId: string | null;
 
@@ -69,6 +73,7 @@ export default function AIPanel({
   setPrompt,
   loading,
   messages,
+  openFiles,
   conversations,
   activeConversationId,
   onCreateConversation,
@@ -101,6 +106,12 @@ export default function AIPanel({
     setEditingTitle,
   ] = useState("");
 
+  const referenceSuggestions =
+  useReferenceSuggestions(
+    prompt,
+    openFiles
+  );
+
   const filteredConversations =
     useMemo(() => {
       const query = search
@@ -124,6 +135,14 @@ export default function AIPanel({
 
     const title =
       editingTitle.trim();
+
+      const referenceSuggestions =
+  useReferenceSuggestions(
+    prompt,
+    conversations.flatMap((conversation) =>
+      conversation.messages.length >= 0 ? [] : []
+    )
+  );
 
     if (title) {
       onRenameConversation(
@@ -328,35 +347,43 @@ export default function AIPanel({
               }
             />
 
-            <textarea
-              value={prompt}
-              onChange={(e) =>
-                setPrompt(
-                  e.target.value
-                )
-              }
-              placeholder="Ask Pulse AI..."
-              className="h-36 w-full resize-none rounded-lg border border-zinc-800 bg-black p-3 text-sm text-white outline-none transition focus:border-blue-500"
-              onKeyDown={(
-                e
-              ) => {
-                if (
-                  e.key ===
-                    "Enter" &&
-                  !e.shiftKey
-                ) {
-                  e.preventDefault();
+          <div className="relative">
+  <textarea
+    value={prompt}
+    onChange={(e) =>
+      setPrompt(e.target.value)
+    }
+    placeholder="Ask Pulse AI..."
+    className="h-36 w-full resize-none rounded-lg border border-zinc-800 bg-black p-3 text-sm text-white outline-none transition focus:border-blue-500"
+    onKeyDown={(e) => {
+      if (
+        e.key === "Enter" &&
+        !e.shiftKey
+      ) {
+        e.preventDefault();
 
-                  if (
-                    loading
-                  ) {
-                    onStop();
-                  } else {
-                    onSend();
-                  }
-                }
-              }}
-            />
+        if (loading) {
+          onStop();
+        } else {
+          onSend();
+        }
+      }
+    }}
+  />
+
+  <ReferenceSuggestions
+    files={referenceSuggestions.suggestions}
+    visible={referenceSuggestions.visible}
+   onSelect={(file) => {
+  setPrompt(
+    prompt.replace(
+      /@([A-Za-z0-9._/-]*)$/,
+      `@${file} `
+    )
+  );
+}}
+  />
+</div>
 
             <div className="mt-3 flex gap-2">
               <button

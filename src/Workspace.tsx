@@ -19,6 +19,9 @@ import CommandPalette from "@/components/command-palette/CommandPalette";
 import { useCommandPalette } from "@/hooks/useCommandPalette";
 import InlinePrompt from "@/components/inline-ai/InlinePrompt";
 import { useInlineAI } from "@/hooks/useInlineAI";
+import { parseReferences } from "@/core/ai/context/parseReferences";
+import { resolveReferences } from "@/core/ai/context/resolveReferences";
+import { loadReferences } from "@/core/ai/context/loadReferences";
 
 interface Message {
   role: "user" | "assistant";
@@ -99,20 +102,41 @@ async function sendToAI(
   try {
     const selection = getEditorSelection();
 
- const aiPrompt = buildPrompt({
+ const openFilePaths = openTabs.map(
+  (tab) => tab.path
+);
+
+const references =
+  parseReferences(finalPrompt);
+
+const resolvedReferences =
+  resolveReferences(
+    references,
+    openFilePaths
+  );
+
+const referencedFiles =
+  await loadReferences(
+    resolvedReferences
+  );
+
+const aiPrompt = buildPrompt({
   fileName: selection.fileName,
   language: selection.language,
   selectedCode: selection.selectedText,
 
-  openFiles: openTabs.map((tab) => tab.path),
+  openFiles: openFilePaths,
+
+  referencedFiles,
 
   conversation: messages
     .slice(-8)
-    .filter((message) => message.content.trim()),
+    .filter((message) =>
+      message.content.trim()
+    ),
 
   userPrompt: finalPrompt,
 });
-
     setMessages((prev) => [
       ...prev,
       {
@@ -240,6 +264,7 @@ useEffect(() => {
         setPrompt={setPrompt}
         loading={loading}
         messages={messages}
+        openFiles={openTabs.map((tab) => tab.path)}
         conversations={conversations}
         activeConversationId={activeConversationId}
         onCreateConversation={createConversation}
