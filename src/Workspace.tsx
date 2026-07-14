@@ -14,6 +14,9 @@ import { getEditorSelection } from "@/components/editor/editorSelection";
 import AIPanel from "@/components/ai/AIPanel";
 import { chatStream } from "@/core/ai/chatStream";
 import { useAIChat } from "@/hooks/useAIChat";
+import { registerAIActions } from "@/core/commands/actions/aiActions";
+import CommandPalette from "@/components/command-palette/CommandPalette";
+import { useCommandPalette } from "@/hooks/useCommandPalette";
 
 interface Message {
   role: "user" | "assistant";
@@ -57,6 +60,10 @@ export default function Workspace() {
   stopGeneration,
   clearChat,
 } = useAIChat();
+const {
+  open,
+  closePalette,
+} = useCommandPalette();
 
 async function sendToAI(
   instruction?: string,
@@ -186,36 +193,48 @@ async function generateTests() {
 async function addComments() {
   await sendToAI("Add helpful comments to this code.");
 }
+useEffect(() => {
+  registerAIActions({
+    explain: explainSelection,
+    fix: fixSelection,
+    optimize: optimizeSelection,
+    tests: generateTests,
+    comments: addComments,
+  });
+}, []);
   return (
+  <>
+    <CommandPalette
+      open={open}
+      onClose={closePalette}
+    />
+
     <div className="flex h-screen bg-black">
       {/* Explorer + Search */}
- <AIPanel
-  prompt={prompt}
-  setPrompt={setPrompt}
-  loading={loading}
-  messages={messages}
-
-  conversations={conversations}
-  activeConversationId={activeConversationId}
-
-  onCreateConversation={createConversation}
-  onSwitchConversation={switchConversation}
-  onRenameConversation={renameConversation}
-  onDeleteConversation={deleteConversation}
-
-  onSend={() => sendToAI()}
-  onStop={stopGeneration}
-  onRegenerate={regenerateResponse}
-  onExplain={explainSelection}
-  onFix={fixSelection}
-  onOptimize={optimizeSelection}
-  onTests={generateTests}
-  onComments={addComments}
-  onClear={clearChat}
-  messagesEndRef={messagesEndRef}
-  messagesContainerRef={messagesContainerRef}
-  handleMessagesScroll={handleMessagesScroll}
-/>
+      <AIPanel
+        prompt={prompt}
+        setPrompt={setPrompt}
+        loading={loading}
+        messages={messages}
+        conversations={conversations}
+        activeConversationId={activeConversationId}
+        onCreateConversation={createConversation}
+        onSwitchConversation={switchConversation}
+        onRenameConversation={renameConversation}
+        onDeleteConversation={deleteConversation}
+        onSend={() => sendToAI()}
+        onStop={stopGeneration}
+        onRegenerate={regenerateResponse}
+        onExplain={explainSelection}
+        onFix={fixSelection}
+        onOptimize={optimizeSelection}
+        onTests={generateTests}
+        onComments={addComments}
+        onClear={clearChat}
+        messagesEndRef={messagesEndRef}
+        messagesContainerRef={messagesContainerRef}
+        handleMessagesScroll={handleMessagesScroll}
+      />
 
       {/* Editor */}
       <main className="flex flex-1 flex-col">
@@ -235,5 +254,6 @@ async function addComments() {
         </div>
       </main>
     </div>
-  );
+  </>
+);
 }

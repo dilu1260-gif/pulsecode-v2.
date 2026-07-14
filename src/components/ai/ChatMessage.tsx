@@ -11,6 +11,7 @@ import { getEditorSelection } from "@/components/editor/editorSelection";
 import MarkdownMessage from "./MarkdownMessage";
 import AICodeActions from "./AICodeActions";
 import AIPreviewModal from "./AIPreviewModal";
+import AIDiffViewer from "./AIDiffViewer";
 
 interface Props {
   role: AIRole;
@@ -26,6 +27,8 @@ export default function ChatMessage({
   const [copied, setCopied] = useState(false);
   const [previewOpen, setPreviewOpen] =
     useState(false);
+    const [diffOpen, setDiffOpen] =
+  useState(false);
 
   const codeBlocks =
     extractCodeBlocks(content);
@@ -82,19 +85,22 @@ export default function ChatMessage({
 
         {role === "assistant" &&
           hasCode && (
-            <AICodeActions
-              onCopy={copyMessage}
-              onPreview={() =>
-                setPreviewOpen(true)
-              }
-              onApply={() => {
-                replaceSelectedCode(
-                  codeBlocks[0].code
-                );
-
-                setPreviewOpen(false);
-              }}
-            />
+           <AICodeActions
+  onCopy={copyMessage}
+  onPreview={() =>
+    setPreviewOpen(true)
+  }
+  onDiff={() =>
+    setDiffOpen(true)
+  }
+  onApply={() => {
+    replaceSelectedCode(
+      codeBlocks[0].code
+    );
+    setPreviewOpen(false);
+    setDiffOpen(false);
+  }}
+/>
           )}
 
         {isStreaming && (
@@ -122,6 +128,37 @@ export default function ChatMessage({
             setPreviewOpen(false)
           }
         />
+        {diffOpen && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+    <div className="flex h-[85vh] w-[95vw] max-w-7xl flex-col overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 shadow-2xl">
+      <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-4">
+        <div>
+          <h2 className="text-lg font-semibold text-white">
+            AI Diff Review
+          </h2>
+
+          <p className="mt-1 text-xs text-zinc-500">
+            Compare your code with the AI suggestion.
+          </p>
+        </div>
+
+        <button
+          onClick={() => setDiffOpen(false)}
+          className="rounded-lg px-3 py-1 text-zinc-400 transition hover:bg-zinc-800 hover:text-white"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-auto p-4">
+        <AIDiffViewer
+          original={originalCode}
+          updated={codeBlocks[0].code}
+        />
+      </div>
+    </div>
+  </div>
+)}
       </div>
     </div>
   );

@@ -3,12 +3,14 @@
 interface Props {
   onCopy: () => void;
   onPreview: () => void;
+  onDiff: () => void;
   onApply: () => void;
 }
 
 export default function AICodeActions({
   onCopy,
   onPreview,
+  onDiff,
   onApply,
 }: Props) {
   const buttonClass =
@@ -28,6 +30,13 @@ export default function AICodeActions({
         className={buttonClass}
       >
         👀 Preview
+      </button>
+
+      <button
+        onClick={onDiff}
+        className={buttonClass}
+      >
+        📊 Diff
       </button>
 
       <button
