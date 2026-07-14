@@ -13,6 +13,7 @@ import { buildPrompt } from "@/core/ai/context/buildPrompt";
 import { getEditorSelection } from "@/components/editor/editorSelection";
 import AIPanel from "@/components/ai/AIPanel";
 import { chatStream } from "@/core/ai/chatStream";
+import { useAIChat } from "@/hooks/useAIChat";
 
 interface Message {
   role: "user" | "assistant";
@@ -25,139 +26,145 @@ export default function Workspace() {
     setActiveFile,
     closeTab,
   } = useExplorerStore();
-  const [prompt, setPrompt] = useState("");
+ const {
+  prompt,
+  setPrompt,
+  lastPrompt,
+  setLastPrompt,
 
-const [messages, setMessages] = useState<Message[]>([]);
-const [loading, setLoading] = useState(false);
-const messagesEndRef = useRef<HTMLDivElement>(null);
+  messages,
+  setMessages,
 
-const USE_STREAMING = true;
+  conversations,
+  activeConversationId,
+  createConversation,
+  switchConversation,
+  renameConversation,
+  deleteConversation,
 
-useEffect(() => {
-  messagesEndRef.current?.scrollIntoView({
-    behavior: "smooth",
-  });
-}, [messages, loading]);
+  loading,
+  setLoading,
 
-function updateAssistantMessage(content: string) {
-  setMessages((prev) => {
-    const next = [...prev];
+  messagesEndRef,
+  messagesContainerRef,
+  handleMessagesScroll,
 
-    if (next.length === 0) return next;
+  abortControllerRef,
 
-    next[next.length - 1] = {
-      role: "assistant",
-      content,
-    };
+  updateAssistantMessage,
+  removeLastAssistantMessage,
 
-    return next;
-  });
-}
-async function sendToAI(instruction?: string) {
+  stopGeneration,
+  clearChat,
+} = useAIChat();
+
+async function sendToAI(
+  instruction?: string,
+  regenerate = false
+) {
   const finalPrompt = instruction
-  ? `${instruction}${prompt ? `\n\n${prompt}` : ""}`
-  : prompt;
+    ? `${instruction}${prompt ? `\n\n${prompt}` : ""}`
+    : prompt;
 
-if (!finalPrompt.trim()) return;
+  if (!finalPrompt.trim()) return;
 
-const userMessage = {
-  role: "user" as const,
-  content: finalPrompt,
-};
+  setLastPrompt(finalPrompt);
 
-  setMessages((prev) => [...prev, userMessage]);
+  const userMessage: Message = {
+    role: "user",
+    content: finalPrompt,
+  };
+
+  if (!regenerate) {
+    setMessages((prev) => [...prev, userMessage]);
+  }
+
   setLoading(true);
 
   try {
     const selection = getEditorSelection();
 
-    const aiPrompt = buildPrompt({
-      fileName: selection.fileName,
-      language: selection.language,
-      selectedCode: selection.selectedText,
-      userPrompt: finalPrompt,
-    });
+ const aiPrompt = buildPrompt({
+  fileName: selection.fileName,
+  language: selection.language,
+  selectedCode: selection.selectedText,
 
-    if (!USE_STREAMING) {
-  const res = await fetch("/api/ai/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      message: aiPrompt,
-    }),
-  });
+  openFiles: openTabs.map((tab) => tab.path),
 
-  const data = await res.json();
+  conversation: messages
+    .slice(-8)
+    .filter((message) => message.content.trim()),
 
-  if (data.success) {
+  userPrompt: finalPrompt,
+});
+
     setMessages((prev) => [
       ...prev,
       {
         role: "assistant",
-        content: data.response,
+        content: "",
       },
     ]);
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    abortControllerRef.current = new AbortController();
+
+    const response = await chatStream(
+      aiPrompt,
+      abortControllerRef.current.signal
+    );
+
+    if (!response.ok || !response.body) {
+      throw new Error("Streaming failed.");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    let content = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) break;
+
+      content += decoder.decode(value, {
+        stream: true,
+      });
+
+      updateAssistantMessage(content);
+    }
+
+    content += decoder.decode();
+    updateAssistantMessage(content);
 
     setPrompt("");
-  } else {
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "assistant",
-        content: data.error ?? "Unknown error",
-      },
-    ]);
-  }
-} else {
-  setMessages((prev) => [
-    ...prev,
-    {
-      role: "assistant",
-      content: "",
-    },
-  ]);
-await new Promise((resolve) => setTimeout(resolve, 0));
-  const response = await chatStream(aiPrompt);
-
-  if (!response.ok || !response.body) {
-    throw new Error("Streaming failed.");
-  }
-
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-
-  let content = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-
-    if (done) break;
-
-    content += decoder.decode(value, {
-      stream: true,
-    });
-
-    updateAssistantMessage(content);
-  }
-
-  setPrompt("");
-}
   } catch (err) {
-    setMessages((prev) => [
-      ...prev,
-      {
-        role: "assistant",
-        content:
-          err instanceof Error
-            ? err.message
-            : "Network error",
-      },
-    ]);
+    if (
+      err instanceof DOMException &&
+      err.name === "AbortError"
+    ) {
+      return;
+    }
+
+    updateAssistantMessage(
+      err instanceof Error
+        ? err.message
+        : "Network error"
+    );
   } finally {
     setLoading(false);
+    abortControllerRef.current = null;
   }
+}
+  
+async function regenerateResponse() {
+  if (!lastPrompt) return;
+
+  removeLastAssistantMessage();
+
+  await sendToAI(lastPrompt, true);
 }
 async function explainSelection() {
   await sendToAI("Explain this code.");
@@ -182,18 +189,32 @@ async function addComments() {
   return (
     <div className="flex h-screen bg-black">
       {/* Explorer + Search */}
-      <AIPanel
+ <AIPanel
   prompt={prompt}
   setPrompt={setPrompt}
   loading={loading}
   messages={messages}
+
+  conversations={conversations}
+  activeConversationId={activeConversationId}
+
+  onCreateConversation={createConversation}
+  onSwitchConversation={switchConversation}
+  onRenameConversation={renameConversation}
+  onDeleteConversation={deleteConversation}
+
   onSend={() => sendToAI()}
+  onStop={stopGeneration}
+  onRegenerate={regenerateResponse}
   onExplain={explainSelection}
   onFix={fixSelection}
   onOptimize={optimizeSelection}
   onTests={generateTests}
   onComments={addComments}
+  onClear={clearChat}
   messagesEndRef={messagesEndRef}
+  messagesContainerRef={messagesContainerRef}
+  handleMessagesScroll={handleMessagesScroll}
 />
 
       {/* Editor */}

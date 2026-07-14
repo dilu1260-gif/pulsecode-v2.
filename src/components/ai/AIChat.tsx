@@ -1,19 +1,19 @@
 "use client";
 
+import type { AIMessage } from "@/core/ai/types";
+
 import ChatMessage from "./ChatMessage";
 import ThinkingBubble from "./ThinkingBubble";
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
-}
-
 interface Props {
-  messages: Message[];
+  messages: AIMessage[];
   loading: boolean;
 }
 
-export default function AIChat({ messages, loading }: Props) {
+export default function AIChat({
+  messages,
+  loading,
+}: Props) {
   return (
     <>
       {messages.map((message, index) => (
@@ -21,6 +21,11 @@ export default function AIChat({ messages, loading }: Props) {
           key={index}
           role={message.role}
           content={message.content}
+          isStreaming={
+            loading &&
+            index === messages.length - 1 &&
+            message.role === "assistant"
+          }
         />
       ))}
 
