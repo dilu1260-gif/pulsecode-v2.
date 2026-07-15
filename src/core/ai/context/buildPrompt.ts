@@ -1,3 +1,5 @@
+import { SYSTEM_PROMPT } from "@/core/ai/prompts/systemPrompt";
+
 export interface AIContext {
   fileName?: string;
   language?: string;
@@ -23,11 +25,10 @@ export function buildPrompt({
   conversation,
   userPrompt,
 }: AIContext) {
+  
   const parts: string[] = [];
 
-  parts.push(
-    "You are Pulse AI, an expert software engineering assistant."
-  );
+parts.push(SYSTEM_PROMPT);
 
   if (fileName) {
     parts.push(`Current File: ${fileName}`);

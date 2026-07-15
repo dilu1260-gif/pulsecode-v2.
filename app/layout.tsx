@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
+
 import "./globals.css";
+
 import GlobalHotkeys from "@/components/GlobalHotkeys";
+
 import CommandInitializer from "@/core/commands/components/CommandInitializer";
+
 import { CommandPalette } from "@/features/command-palette";
 import { AIChat } from "@/features/ai";
 import { AIInitializer } from "@/core/ai";
+
+import ErrorBoundary from "@/components/error/ErrorBoundary";
+import CommandRegistrations from "@/core/commands/registrations/CommandRegistrations";
+import SettingsPanel from "@/components/settings/SettingsPanel";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,28 +42,35 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-black text-white">
+        <ErrorBoundary>
       <CommandInitializer />
-      <AIInitializer />
 
-        {children}
+<CommandRegistrations />
 
-        <CommandPalette />
+<AIInitializer />
 
-        <AIChat />
+          {children}
 
-        <GlobalHotkeys />
+          <CommandPalette />
 
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 2500,
-            style: {
-              background: "#18181b",
-              color: "#fff",
-              border: "1px solid #27272a",
-            },
-          }}
-        />
+<AIChat />
+
+<SettingsPanel />
+
+<GlobalHotkeys />
+
+<Toaster 
+            position="top-right"
+            toastOptions={{
+              duration: 2500,
+              style: {
+                background: "#18181b",
+                color: "#fff",
+                border: "1px solid #27272a",
+              },
+            }}
+          />
+        </ErrorBoundary>
       </body>
     </html>
   );

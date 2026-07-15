@@ -1,35 +1,183 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ⚡ PulseCode
 
-PulseCode Save Test 2026
+> **AI-first IDE built for modern developers.**
 
-First, run the development server:
+PulseCode is a modern AI-powered IDE that combines a fast code editor with intelligent AI assistance. It helps developers write, understand, optimize, and improve code without leaving their workspace.
+
+> 🚀 **Current Status:** v1.0 Release Candidate (RC1)
+
+---
+
+## ✨ Features
+
+### 🤖 AI Assistant
+
+- AI Chat
+- Streaming AI responses
+- Explain selected code
+- Fix code
+- Optimize code
+- Generate tests
+- Add comments
+- Markdown rendering
+- Code block detection
+- AI file generation
+- AI diff viewer
+- AI preview
+
+### 💻 Code Editor
+
+- Monaco Editor
+- Syntax highlighting
+- Multiple tabs
+- Dirty file tracking
+- Ctrl + S support
+- Configurable editor settings
+- Minimap
+- Word wrap
+- Font size customization
+
+### 📁 Workspace
+
+- File Explorer
+- Folder Explorer
+- Create files
+- Create folders
+- Rename
+- Delete
+- Duplicate
+- Paste
+- Workspace persistence
+
+### ⚙ Developer Experience
+
+- Command Palette
+- Integrated Terminal
+- Project Search
+- Conversation History
+- Settings
+- Error Boundary
+- Loading UI
+
+---
+
+# 🛠 Tech Stack
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- Monaco Editor
+- Google Gemini API
+- Zustand
+
+---
+
+# 🚀 Getting Started
+
+## Clone
+
+```bash
+git clone https://github.com/YOUR_USERNAME/pulsecode.git
+```
+
+## Install
+
+```bash
+npm install
+```
+
+## Environment
+
+Create:
+
+```text
+.env.local
+```
+
+Example:
+
+```env
+GEMINI_API_KEY=YOUR_API_KEY
+```
+
+## Start Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# orabc
-abc
-ikj
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+http://localhost:3000
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+# 📂 Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+app/
+src/
+  components/
+  core/
+  features/
+  hooks/
+  lib/
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+# 🗺 Roadmap
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## ✅ Version 1.0
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- AI Chat
+- Streaming
+- Monaco Editor
+- Workspace Explorer
+- Terminal
+- Search
+- Settings
+- Command Palette
+
+## 🚀 Version 1.1
+
+- Save All
+- Auto Save
+- Complete Document Model
+- Better AI Editing
+- Performance Improvements
+
+## 🌌 Future
+
+- AI Agent Mode
+- Git Integration
+- Extensions
+- Plugin System
+- Multi-file AI Editing
+
+---
+
+# 🤝 Contributing
+
+Contributions are welcome.
+
+Please open an issue before submitting major changes.
+
+---
+
+# 📄 License
+
+MIT
+
+---
+
+# ❤️ Built with
+
+- Next.js
+- React
+- TypeScript
+- Monaco Editor
+- Google Gemini

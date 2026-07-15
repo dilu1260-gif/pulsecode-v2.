@@ -12,6 +12,11 @@ import MarkdownMessage from "./MarkdownMessage";
 import AICodeActions from "./AICodeActions";
 import AIPreviewModal from "./AIPreviewModal";
 import AIDiffViewer from "./AIDiffViewer";
+import { extractFiles } from "@/core/ai/files/extractFiles";
+import AIFileList from "@/components/ai/files/AIFileList";
+import AIFilePreview from "@/components/ai/files/AIFilePreview";
+import { createAIFile } from "@/core/ai/files/createAIFile";
+import AIResponseRenderer from "./renderers/AIResponseRenderer";
 
 interface Props {
   role: AIRole;
@@ -27,11 +32,15 @@ export default function ChatMessage({
   const [copied, setCopied] = useState(false);
   const [previewOpen, setPreviewOpen] =
     useState(false);
+
     const [diffOpen, setDiffOpen] =
   useState(false);
 
   const codeBlocks =
     extractCodeBlocks(content);
+
+    const generatedFiles =
+  extractFiles(content);
 
   const hasCode =
     codeBlocks.length > 0;
@@ -67,9 +76,9 @@ export default function ChatMessage({
             : "bg-zinc-900 text-white"
         }`}
       >
-        <MarkdownMessage
-          content={content}
-        />
+       <AIResponseRenderer
+  content={content}
+/>
 
         {role === "assistant" && (
           <button
@@ -99,15 +108,16 @@ export default function ChatMessage({
     );
     setPreviewOpen(false);
     setDiffOpen(false);
-  }}
-/>
-          )}
+      }}
+    />
+)}
 
         {isStreaming && (
           <span className="ml-1 animate-pulse font-bold">
             ▍
           </span>
         )}
+
 
         <AIPreviewModal
           open={previewOpen}

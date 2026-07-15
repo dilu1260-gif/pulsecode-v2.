@@ -21,9 +21,16 @@ interface ExplorerStore {
 
   setActiveFile: (id: string) => void;
 
+restoreWorkspace: (
+  openTabs: OpenTab[],
+  activeFile?: string
+) => void;
+
   openFile: (file: WorkspaceNode) => void;
 
   closeTab: (id: string) => void;
+
+closeAllTabs: () => void;
 
   setTabDirty: (id: string, dirty: boolean) => void;
 
@@ -55,6 +62,15 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
       activeFile: id,
     }),
 
+restoreWorkspace: (
+  openTabs,
+  activeFile
+) =>
+  set({
+    openTabs,
+    activeFile,
+  }),
+  
   openFile: (file) => {
     const tabs = get().openTabs;
 
@@ -85,6 +101,13 @@ export const useExplorerStore = create<ExplorerStore>((set, get) => ({
       activeFile: tabs.length ? tabs[0].id : undefined,
     });
   },
+
+closeAllTabs: () => {
+  set({
+    openTabs: [],
+    activeFile: undefined,
+  });
+},
 
   setTabDirty: (id, dirty) => {
     set({

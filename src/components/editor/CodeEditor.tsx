@@ -9,6 +9,7 @@ import type * as monaco from "monaco-editor";
 import { useEditorStore } from "./editorStore";
 import { setEditorInstance } from "./editorInstance";
 import { getAIActions } from "@/core/commands/actions/aiActions";
+import { useSettings } from "@/hooks/useSettings";
 
 import {
   useCommand,
@@ -21,6 +22,7 @@ export default function CodeEditor() {
     setTabDirty,
   } = useExplorerStore();
 
+const { settings } = useSettings();
   const [content, setContent] = useState("");
   const [language, setLanguage] = useState("typescript");
   const [saving, setSaving] = useState(false);
@@ -251,7 +253,7 @@ const { targetLine, searchTerm, clearJump } = useEditorStore();
       <div className="flex-1">
         <Editor
           height="100%"
-          theme="vs-dark"
+          theme={settings.editor.theme}
           path={file.path}
           language={language}
           value={content}
@@ -321,15 +323,23 @@ const { targetLine, searchTerm, clearJump } = useEditorStore();
             setStatus("Modified");
             setTabDirty(file.id, true);
           }}
-          options={{
-            minimap: {
-              enabled: true,
-            },
-            fontSize: 14,
-            automaticLayout: true,
-            scrollBeyondLastLine: false,
-            wordWrap: "on",
-          }}
+         options={{
+  minimap: {
+    enabled: settings.editor.minimap,
+  },
+
+  fontSize: settings.editor.fontSize,
+
+  automaticLayout: true,
+
+  scrollBeyondLastLine: false,
+
+  tabSize: settings.editor.tabSize,
+
+  wordWrap: settings.editor.wordWrap
+    ? "on"
+    : "off",
+}}
         />
       </div>
 
