@@ -8,6 +8,7 @@ import { useRef } from "react";
 import type * as monaco from "monaco-editor";
 import { useEditorStore } from "./editorStore";
 import { setEditorInstance } from "./editorInstance";
+import { getAIActions } from "@/core/commands/actions/aiActions";
 
 import {
   useCommand,
@@ -254,9 +255,66 @@ const { targetLine, searchTerm, clearJump } = useEditorStore();
           path={file.path}
           language={language}
           value={content}
-          onMount={(editor) => {
+        onMount={(editor, monaco) => {
   editorRef.current = editor;
   setEditorInstance(editor);
+
+  const ai = getAIActions();
+
+  editor.addAction({
+    id: "pulse-ai-explain",
+    label: "✨ Explain Selection",
+    contextMenuGroupId: "navigation",
+    contextMenuOrder: 100,
+
+    run: async () => {
+      await ai.explain();
+    },
+  });
+
+  editor.addAction({
+    id: "pulse-ai-fix",
+    label: "🛠 Fix Code",
+    contextMenuGroupId: "navigation",
+    contextMenuOrder: 101,
+
+    run: async () => {
+      await ai.fix();
+    },
+  });
+
+  editor.addAction({
+    id: "pulse-ai-optimize",
+    label: "⚡ Optimize Code",
+    contextMenuGroupId: "navigation",
+    contextMenuOrder: 102,
+
+    run: async () => {
+      await ai.optimize();
+    },
+  });
+
+  editor.addAction({
+    id: "pulse-ai-tests",
+    label: "🧪 Generate Tests",
+    contextMenuGroupId: "navigation",
+    contextMenuOrder: 103,
+
+    run: async () => {
+      await ai.tests();
+    },
+  });
+
+  editor.addAction({
+    id: "pulse-ai-comments",
+    label: "💬 Add Comments",
+    contextMenuGroupId: "navigation",
+    contextMenuOrder: 104,
+
+    run: async () => {
+      await ai.comments();
+    },
+  });
 }}
           onChange={(value) => {
             setContent(value ?? "");
